@@ -6,9 +6,10 @@ using UnityEngine;
 public class CharacterController : MonoBehaviour
 {
     public GameObject playerObject;
+    public Animator animator;
 
     [SerializeField]
-    [Range (0.1f, 2f)]
+    [Range(0.1f, 2f)]
     private float moveSpeed = 0.1f;
 
     [SerializeField]
@@ -22,97 +23,101 @@ public class CharacterController : MonoBehaviour
     private bool enableTeleports;
     private bool enableMovement;
 
+    private bool isRunning;
+    private bool isAttacking;
+    private bool isHurt;
+    private bool isDead;
 
-    // Start is called before the first frame update
     public void SetUpCharacter()
     {
         this.playerObject.SetActive(true);
         this.startingRoomID = FullDungeonGenerator.GetStartingRoomID();
         this.roomInfo = FullDungeonGenerator.GetFinalizedRooms();
-        Debug.Log("ROOM INGO:"+ this.roomInfo);
         this.enableTeleports = true;
         this.enableMovement = true;
         this.currentRoom = this.roomInfo[this.startingRoomID];
     }
 
-    // Update is called once per frame
     void FixedUpdate()
     {
         if (this.enableMovement)
         {
 
-        
-        if(Input.GetKey(KeyCode.W))
-        {
-            this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(0, moveSpeed, 0);
-        }
+            if(Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
+            {
+                this.isRunning = true;
+            }
+            else
+            {
+                this.isRunning = false;
+            }
 
-        if (Input.GetKey(KeyCode.S))
-        {
-            this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(0, -moveSpeed, 0);
-        }
+            this.animator.SetBool("isRunning", isRunning);
 
-        if (Input.GetKey(KeyCode.A))
-        {
-            this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(-moveSpeed, 0, 0);
-        }
+            if (Input.GetKey(KeyCode.W))
+            {
+                this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(0, moveSpeed, 0);
+            }
 
-        if (Input.GetKey(KeyCode.D))
-        {
-            this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(moveSpeed, 0, 0);
-        }
-        //Temporary solution
-        if (Input.GetKey(KeyCode.Return) && !this.enableTeleports)
-        {
-            Debug.Log("ENABLE TELEPORTS");
-            this.DisableEnemiesInRoom();
-            this.enableTeleports = true;
-        }
+            if (Input.GetKey(KeyCode.S))
+            {
+                this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(0, -moveSpeed, 0);
+            }
+
+            if (Input.GetKey(KeyCode.A))
+            {
+                this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(-moveSpeed, 0, 0);
+                this.playerObject.transform.rotation = new Quaternion(this.playerObject.transform.rotation.x,
+                            0f, this.playerObject.transform.rotation.z, this.playerObject.transform.rotation.w);
+            }
+
+            if (Input.GetKey(KeyCode.D))
+            {
+                this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(moveSpeed, 0, 0);
+                this.playerObject.transform.rotation = new Quaternion(this.playerObject.transform.rotation.x,
+                            180f, this.playerObject.transform.rotation.z, this.playerObject.transform.rotation.w);
+
+            }
+            //Temporary solution
+            if (Input.GetKey(KeyCode.Return) && !this.enableTeleports)
+            {
+                Debug.Log("ENABLE TELEPORTS");
+                this.DisableEnemiesInRoom();
+                this.enableTeleports = true;
+            }
 
         }
 
     }
 
-    //Detect collisions between the GameObjects with Colliders attached
     void OnCollisionEnter2D(Collision2D collision)
     {
-
-        //Check for a match with the specified name on any GameObject that collides with your GameObject
         /*if (collision.gameObject.name == "Walls")
         {
         }*/
-
-        //Check for a match with the specific tag on any GameObject that collides with your GameObject
         if (collision.gameObject.tag == "Teleport" && enableTeleports)
         {
 
             Debug.Log(this.currentRoom);
             Debug.Log(collision);
+            this.isRunning = false;
+            this.animator.SetBool("isRunning", isRunning);
 
-            if(this.currentRoom.exit != null && Mathf.Abs(collision.transform.position.x - this.currentRoom.exit.teleportFrom.x) < 1f
+            if (this.currentRoom.exit != null && Mathf.Abs(collision.transform.position.x - this.currentRoom.exit.teleportFrom.x) < 1f
                 && collision.transform.position.y - this.currentRoom.exit.teleportFrom.y < 1f)
             {
-
-                //WEZ DODAJ ZEBY BYL FREEZE PO TELEPORCIE NA CHWILE
-
                 this.enableTeleports = false;
                 this.enableMovement = false;
                 this.playerObject.transform.position = new Vector3(this.currentRoom.exit.teleportTo.x,
-                    this.currentRoom.exit.teleportTo.y,0);
+                    this.currentRoom.exit.teleportTo.y, 0);
 
-                Debug.Log("POZYCJA GRACZA PO TPKU: "+this.playerObject.transform.position);
+                Debug.Log("POZYCJA GRACZA PO TPKU: " + this.playerObject.transform.position);
 
                 this.currentRoom = this.roomInfo[this.currentRoom.exit.teleportToRoomId];
 
                 Invoke("EnableMovement", enterRoomIdleDelay);
                 Invoke("EnableEnemiesInRoom", enterRoomIdleDelay);
 
-                /*if (0 != this.currentRoom.connections.Count)
-                {
-                    int nextRoomId = this.currentRoom.connections[0];
-                    this.currentRoom = this.roomInfo[nextRoomId];
-                }
-*/
             }
 
             if (this.currentRoom.entrance != null && Mathf.Abs(collision.transform.position.x - this.currentRoom.entrance.teleportFrom.x) < 1f
@@ -123,8 +128,6 @@ public class CharacterController : MonoBehaviour
                 this.enableMovement = false;
                 this.playerObject.transform.position = new Vector3(this.currentRoom.entrance.teleportTo.x,
                     this.currentRoom.entrance.teleportTo.y, 0);
-
-                Debug.Log("POZYCJA GRACZA PO TPKU: " + this.playerObject.transform.position);
 
                 this.currentRoom = this.roomInfo[this.currentRoom.entrance.teleportToRoomId];
 
@@ -144,11 +147,9 @@ public class CharacterController : MonoBehaviour
 
     private void EnableEnemiesInRoom()
     {
-        foreach(GameObject e in this.currentRoom.enemies)
+        foreach (GameObject e in this.currentRoom.enemies)
         {
-            e.GetComponent<BasicEnemy>().player = this.playerObject;
-            e.GetComponent<BasicEnemy>().ActivateEnemy();
-            Debug.Log(e.GetComponent<BasicEnemy>().isActive);
+            e.GetComponent<Enemy>().ActivateEnemy();
         }
     }
 
@@ -156,7 +157,7 @@ public class CharacterController : MonoBehaviour
     {
         foreach (GameObject e in this.currentRoom.enemies)
         {
-            e.GetComponent<BasicEnemy>().DeactivateEnemy();
+            e.GetComponent<Enemy>().DeactivateEnemy();
         }
     }
 

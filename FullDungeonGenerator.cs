@@ -150,7 +150,7 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
             {
                 Vector2Int randomField = room.FloorTiles.ElementAt(UnityEngine.Random.Range(0, room.FloorTiles.Count));
                 GameObject enemy = Instantiate(this.enemyPrefab, ((Vector3Int)randomField), Quaternion.identity);
-                enemy.AddComponent<BasicEnemy>();
+                /*enemy.AddComponent<BasicEnemy>();*/
                 this.enemies.Add(enemy);
                 room.enemies.Add(enemy);
             }
