@@ -3,54 +3,29 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class BasicEnemy : MonoBehaviour
+public class BasicEnemy : Enemy
 {
-
-    /*public GameController gameController;*/
-    [SerializeField]
-    private GameObject player;
-    [SerializeField]
-    private float movementSpeed = 5f;
-
-    [SerializeField]
-    private bool IsThisActive;
-    public BasicEnemy(GameObject enemyObject)
-    {
-       /*this.enemyObject = enemyObject;*/
-    }
+    public GameObject player;
 
     void Start()
     {
+    
     }
 
     void FixedUpdate()
     {
-       /* Debug.Log("fixed UPDATE");*/
-
-        if (IsThisActive)
-        {
-            Debug.Log("IS THIS ACTIVE:");
-
-        }
-
-        
-
         float step = this.movementSpeed * Time.deltaTime;
-        if(IsThisActive)
-        {
+        if(this.isActive){
             this.transform.position = Vector3.MoveTowards(this.transform.position, player.transform.position, step);
         }
     }
-
-    public void ActivateEnemy()
+    public override void ActivateEnemy()
     {
-        //CZEMU TO NIE DZIALAAA
-        Debug.Log("ACTIVATE ENEMY DZIALA:");
-        this.IsThisActive = true;
+        this.isActive = true;
     }
 
-    public void DeactivateEnemy()
+    public override void DeactivateEnemy()
     {
-        this.IsThisActive = false;
+        this.isActive = false;
     }
 }

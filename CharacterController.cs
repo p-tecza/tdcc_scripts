@@ -65,6 +65,7 @@ public class CharacterController : MonoBehaviour
         if (Input.GetKey(KeyCode.Return) && !this.enableTeleports)
         {
             Debug.Log("ENABLE TELEPORTS");
+            this.DisableEnemiesInRoom();
             this.enableTeleports = true;
         }
 
@@ -145,13 +146,17 @@ public class CharacterController : MonoBehaviour
     {
         foreach(GameObject e in this.currentRoom.enemies)
         {
-            /*Debug.Log(e.IsThisActive);
-            e.IsThisActive = true;*/
+            e.GetComponent<BasicEnemy>().player = this.playerObject;
             e.GetComponent<BasicEnemy>().ActivateEnemy();
+            Debug.Log(e.GetComponent<BasicEnemy>().isActive);
+        }
+    }
 
-
-            /*Debug.Log(e.IsThisActive);*/
-
+    private void DisableEnemiesInRoom()
+    {
+        foreach (GameObject e in this.currentRoom.enemies)
+        {
+            e.GetComponent<BasicEnemy>().DeactivateEnemy();
         }
     }
 
