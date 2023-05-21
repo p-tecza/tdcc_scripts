@@ -9,6 +9,10 @@ public class GameController : MonoBehaviour
     private GameObject playerObject;
     [SerializeField]
     private FullDungeonGenerator dungeonGenerator;
+
+    [SerializeField]
+    private CharacterController characterController;
+
     [SerializeField]
     private Camera mainCamera;
     [SerializeField]
@@ -22,6 +26,8 @@ public class GameController : MonoBehaviour
         Vector3 startPosition = dungeonGenerator.GetStartingPosition();
         playerObject.transform.position = startPosition;
         mainCamera.transform.position = startPosition;
+        characterController.SetUpCharacter();
+        characterController.enabled = true;
     }
 
     // Update is called once per frame

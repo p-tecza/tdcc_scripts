@@ -32,12 +32,10 @@ public class TilemapVisualizer : MonoBehaviour
         floorTilemap.SetTileFlags(tilePosition, TileFlags.None);
         floorTilemap.SetColor(tilePosition, color);
     }
-    public void PaintSingleWallTileWithColor(Vector2Int position, Color color)
+    public void DeleteSingleTile(Vector2Int position)
     {
         var tilePosition = wallTilemap.WorldToCell((Vector3Int)position);
-        wallTilemap.SetTile(tilePosition, passageTile);
-        wallTilemap.SetTileFlags(tilePosition, TileFlags.None);
-        wallTilemap.SetColor(tilePosition, color);
+        wallTilemap.SetTile(tilePosition, null);
     }
 
     public void TestujeSe(Vector2Int position, Color color)
