@@ -18,6 +18,7 @@ public class BasicEnemy : Enemy
     void Start()
     {
         /*this.animator.SetBool("isRunning", true);*/
+        this.currentHealth = this.healthPoints;
     }
 
     void FixedUpdate()
@@ -32,7 +33,7 @@ public class BasicEnemy : Enemy
 
             if (Vector3.Distance(this.transform.position, player.transform.position) < 1.5f )
             {
-                Debug.Log("JEST W ZASIEGU ATAKU");
+                //Debug.Log("JEST W ZASIEGU ATAKU");
                 this.StartAttacking();
             }
             else if(this.transform.position.x > player.transform.position.x && CheckIfAnimationsEnded())
@@ -62,6 +63,16 @@ public class BasicEnemy : Enemy
     public override void DeactivateEnemy()
     {
         this.isActive = false;
+    }
+
+    public override void TakeDamage(int damageTaken)
+    {
+        this.currentHealth -= damageTaken;
+        Debug.Log("Enemy dostal obrazenia, current hp: " + this.currentHealth);
+        if(this.currentHealth < 0)
+        {
+            Debug.Log("Enemy UMIERA.");
+        }
     }
 
     private void StartRunning()

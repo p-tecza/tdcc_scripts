@@ -28,6 +28,24 @@ public class CharacterController : MonoBehaviour
     private bool isHurt;
     private bool isDead;
 
+
+    // STATS
+
+    [SerializeField]
+    private int playerMaxHealth;
+    private int playerCurrentHealth;
+    [SerializeField]
+    private int playerAttackDamage;
+    [SerializeField]
+    private float playerAttackSpeed;
+    [SerializeField]
+    private float playerAttackRange;
+    [SerializeField]
+    private Transform playerAttackPoint;
+    [SerializeField]
+    private LayerMask enemyLayer;
+
+
     public void SetUpCharacter()
     {
         this.playerObject.SetActive(true);
@@ -51,33 +69,34 @@ public class CharacterController : MonoBehaviour
             {
                 this.isRunning = false;
             }
-
+            
             this.animator.SetBool("isRunning", isRunning);
 
-            if (Input.GetKey(KeyCode.W))
+            if (Input.GetKey(KeyCode.W) && !isAttacking)
             {
                 this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(0, moveSpeed, 0);
             }
 
-            if (Input.GetKey(KeyCode.S))
+            if (Input.GetKey(KeyCode.S) && !isAttacking)
             {
                 this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(0, -moveSpeed, 0);
             }
 
-            if (Input.GetKey(KeyCode.A))
+            if (Input.GetKey(KeyCode.A) && !isAttacking)
             {
                 this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(-moveSpeed, 0, 0);
                 this.playerObject.transform.rotation = new Quaternion(this.playerObject.transform.rotation.x,
                             0f, this.playerObject.transform.rotation.z, this.playerObject.transform.rotation.w);
             }
 
-            if (Input.GetKey(KeyCode.D))
+            if (Input.GetKey(KeyCode.D) && !isAttacking)
             {
                 this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(moveSpeed, 0, 0);
                 this.playerObject.transform.rotation = new Quaternion(this.playerObject.transform.rotation.x,
                             180f, this.playerObject.transform.rotation.z, this.playerObject.transform.rotation.w);
 
-            }
+            }     
+
             //Temporary solution
             if (Input.GetKey(KeyCode.Return) && !this.enableTeleports)
             {
@@ -88,6 +107,16 @@ public class CharacterController : MonoBehaviour
 
         }
 
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            this.animator.SetTrigger("attack");
+            this.isAttacking = true;
+        }
+       
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -140,6 +169,24 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    void AttackAnimationEnd()
+    {
+        this.isAttacking = false;
+    }
+
+
+    void DealDamage()
+    {
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(playerAttackPoint.position, playerAttackRange, enemyLayer);
+
+        foreach(Collider2D enemy in hitEnemies)
+        {
+            Debug.Log("Hit: " + enemy.name);
+            enemy.GetComponent<Enemy>().TakeDamage(this.playerAttackDamage);
+        }
+
+    }
+
     private void EnableMovement()
     {
         this.enableMovement = true;
@@ -159,6 +206,13 @@ public class CharacterController : MonoBehaviour
         {
             e.GetComponent<Enemy>().DeactivateEnemy();
         }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (playerAttackPoint == null)
+            return;
+        Gizmos.DrawWireSphere(playerAttackPoint.position, playerAttackRange);
     }
 
 }

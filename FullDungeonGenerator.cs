@@ -385,7 +385,7 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
             Debug.Log(roomTile);
         }
 */
-        Debug.Log("TELEPORT LOCATION: "+teleportLocation);
+        /*Debug.Log("TELEPORT LOCATION: "+teleportLocation);*/
 
         return newPosition;
     }
@@ -495,12 +495,12 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
     }
     public static Dictionary<int, Room> GetFinalizedRooms()
     {
-        Debug.Log("IDs");
+        /*Debug.Log("IDs");
         foreach(Room r in finalizedRooms.Values)
         {
             Debug.Log(r.Id);
         }
-        Debug.Log("Koniec IDs");
+        Debug.Log("Koniec IDs");*/
         return finalizedRooms;
     }
 
