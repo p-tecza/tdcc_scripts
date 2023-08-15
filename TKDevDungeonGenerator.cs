@@ -32,7 +32,7 @@ namespace Assets._Scripts
             tilemapVisualizer.Clear();
             foreach (var position in floorPositions)
             {
-                tilemapVisualizer.PaintFloorTiles(floorPositions);
+                tilemapVisualizer.PaintFloorTiles(floorPositions, false);
             }
             WallGenerator.CreateWalls(floorPositions, tilemapVisualizer);
         }

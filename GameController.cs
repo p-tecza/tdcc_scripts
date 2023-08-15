@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class GameController : MonoBehaviour
@@ -10,8 +11,12 @@ public class GameController : MonoBehaviour
     [SerializeField]
     private FullDungeonGenerator dungeonGenerator;
 
+    public GameOverScreen gameOverScreen;
+
     [SerializeField]
-    private CharacterController characterController;
+    private PlayerController characterController;
+
+    public TMP_Text tmpCoinsAmount;
 
     [SerializeField]
     private Camera mainCamera;
@@ -36,4 +41,15 @@ public class GameController : MonoBehaviour
         mainCamera.transform.position = 
             new Vector3(playerObject.transform.position.x, playerObject.transform.position.y, -cameraZoom);
     }
+
+    public void UpdateUICoinsAmount(int newCoinsAmount)
+    {
+        this.tmpCoinsAmount.text = newCoinsAmount.ToString();
+    }
+
+    public void GameOver()
+    {
+        this.gameOverScreen.GameOverScreenPopUp();
+    }
+
 }
