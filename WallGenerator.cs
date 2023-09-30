@@ -25,6 +25,14 @@ public static class WallGenerator
         }
     }
 
+    public static void GenerateWallsInGivenLocations(HashSet<Vector2Int> wallPositions, TilemapVisualizer tilemapVisualizer)
+    {
+        foreach (var position in wallPositions)
+        {
+            tilemapVisualizer.PaintSingleSideWall(position);
+        }
+    }
+
 
     public static HashSet<Vector2Int> getAllWallTiles()
     {

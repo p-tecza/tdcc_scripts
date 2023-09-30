@@ -73,7 +73,7 @@ public class CorridorFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
         var currentPosition = startPosition;
         potentialRoomPositions.Add(currentPosition);
 
-        Direction2D.setupRandomizer(this.seed);
+        /*Direction2D.setupRandomizer(this.seed);*/
         for(int i=0; i<corridorLength; i++){
             var corridor = ProceduralGenerationAlgorithms.RandomWalkCorridor(currentPosition, corridorLength, this.isSeeded, this.seed);
             currentPosition = corridor[corridor.Count-1];
@@ -89,7 +89,7 @@ public class CorridorFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
         List<Vector2Int> roomsToCreate = potentialRoomPositions.OrderBy(x => System.Guid.NewGuid())
         .Take(roomToCreateCount).ToList();
 
-        Direction2D.setupRandomizer(this.seed+1);
+        /*Direction2D.setupRandomizer(this.seed+1);*/
         foreach(var roomPosition in roomsToCreate){
             var roomFloor = RunRandomWalk(randomWalkParameters, roomPosition);
             roomPositions.UnionWith(roomFloor);

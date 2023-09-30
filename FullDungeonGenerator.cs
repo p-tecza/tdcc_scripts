@@ -1,11 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Tilemaps;
-using UnityEngine.UIElements;
+
 
 public class FullDungeonGenerator : RoomFirstDungeonGenerator
 {
@@ -19,6 +16,7 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
     [SerializeField]
     protected int treasureRoomsAmount = 2;
 
+    public GameObject availableTreasures;
     public GameObject treasurePrefab, enemyPrefab, coinsPrefab;
     public GameObject teleportInPrefab, teleportOutPrefab;
 
@@ -31,6 +29,12 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
     public int maxEnemiesInRoom = 5;
     [Range(1, 20)]
     public int maxCoinsInRoom = 5;
+    [Range(0, 3)]
+    public int maxHpPotsInChest = 2;
+    [Range(0, 8)]
+    public int maxCoinsInChest = 4;
+    [Range(0, 1)]
+    public int maxStarsInChest = 1;
 
     private Vector3 startingPosition;
 
@@ -42,6 +46,19 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
 
     protected override void RunProceduralGeneration()
     {
+        if (this.isSeeded)
+        {
+            UnityEngine.Random.InitState(this.seed);
+            ProceduralGenerationAlgorithms.InitSeed(this.seed);
+            Debug.Log("SEEDED");
+        }
+        else
+        {
+            Debug.Log("NOT SEEDED");
+            UnityEngine.Random.InitState(UnityEngine.Random.Range(0,int.MaxValue));
+            ProceduralGenerationAlgorithms.InitSeed(UnityEngine.Random.Range(0,int.MaxValue));
+        }
+
         Dictionary<Vector2Int, HashSet<Vector2Int>> rooms = base.RunBSPGeneration();
 
         int minX = int.MaxValue;
@@ -89,7 +106,7 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
             {
                 newRoom = new Room(false);
             }
-            
+
             HashSet<Vector2Int> wallTiles = ScanForWallsOfRoom(roomTiles);
             newRoom.FloorTiles = roomTiles;
             newRoom.WallTiles = wallTiles;
@@ -100,22 +117,24 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
 
         Debug.Log("COUNT FINALIZED ROOMS: " + finalizedRooms.Count);
 
-        /*        Dictionary<int, Vector2Int> identifiedRooms = GenerateRoomsIDs(rooms.Keys.ToHashSet());*/
-
-
         startingRoomID = DetermineStartingRoom(bspRoomsAmount);
-        /*this.startingPosition = CalculateStartingPosition(rooms[identifiedRooms[startingRoomID]]);*/
         this.startingPosition = CalculateStartingPosition(finalizedRooms[startingRoomID].FloorTiles);
-
         this.bossRoomIDs.Add(DetermineBossRoom(startingRoomID, finalizedRooms.Count));
-        /*List<int> treasureRoomIDs = new List<int>();*/
+
+
+        int amountOfPossibleTreasures = this.availableTreasures.transform.childCount;
+        Dictionary<string, int> treasureContent = GenerateTreasureContent(amountOfPossibleTreasures);
+
         for (int i = 0; i < treasureRoomsAmount; i++)
         {
             int newTreasureRoomID = DetermineTreasureRoom(startingRoomID, this.bossRoomIDs[0], this.treasureRoomIDs, finalizedRooms.Count);
             this.treasureRoomIDs.Add(newTreasureRoomID);
+
+            Dictionary<string, int> thisTreasureContent = GetSpecificTreasureContent(treasureContent, i);
             MarkRoom(finalizedRooms[newTreasureRoomID].FloorTiles, Color.yellow);
-            GenerateTreasureRoomsPrefabs(finalizedRooms[newTreasureRoomID].FloorTiles);
+            GenerateTreasureRoomsPrefabs(finalizedRooms[newTreasureRoomID].FloorTiles, thisTreasureContent);
         }
+
         MarkRoom(finalizedRooms[startingRoomID].FloorTiles, Color.green);
         MarkRoom(finalizedRooms[this.bossRoomIDs[0]].FloorTiles, Color.red);
 
@@ -125,6 +144,54 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         GenerateEnemies();
         GenerateCoins();
 
+    }
+
+    private Dictionary<string, int> GetSpecificTreasureContent(Dictionary<string, int> all, int whichRoom)
+    {
+        return new Dictionary<string, int>()
+        {
+            { "item", all["item"+whichRoom] },
+            { "hpPots", all["hpPots"+whichRoom] },
+            { "coins", all["coins"+whichRoom] },
+            { "stars", all["stars"+whichRoom] },
+        };
+    }
+
+    private Dictionary<string, int> GenerateTreasureContent(int amountOfTreasures)
+    {
+        Dictionary<string, int> treasureContent= new Dictionary<string, int>();
+        List<int> rolledValues = new List<int>();
+        for(int i = 0; i < this.treasureRoomsAmount; i++)
+        {
+            int itemIt = UnityEngine.Random.Range(0, amountOfTreasures);
+            if (rolledValues.Contains(itemIt))
+            {
+                i--;
+                continue;
+            }
+            rolledValues.Add(itemIt);
+            treasureContent.Add("item" + i, itemIt);
+        }
+
+        for(int j = 0; j < this.treasureRoomsAmount; j++)
+        {
+            int hpPots = UnityEngine.Random.Range(0, this.maxHpPotsInChest);
+            int coins = UnityEngine.Random.Range(0, this.maxCoinsInChest);
+            int stars = this.maxStarsInChest;
+
+            for (int i = 0; i < maxStarsInChest * 3; i++)
+            {
+                if (UnityEngine.Random.Range(0, 2) == 0)
+                {
+                    stars--;
+                    if (stars == 0) break;
+                }
+            }
+            treasureContent.Add("hpPots"+j, hpPots);
+            treasureContent.Add("coins"+j, coins);
+            treasureContent.Add("stars"+j, stars);
+        }
+        return treasureContent;
     }
 
     private void GenerateEnemies()
@@ -145,7 +212,6 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
             {
                 Vector2Int randomField = room.FloorTiles.ElementAt(UnityEngine.Random.Range(0, room.FloorTiles.Count));
                 GameObject enemy = Instantiate(this.enemyPrefab, ((Vector3Int)randomField), Quaternion.identity);
-                /*enemy.AddComponent<BasicEnemy>();*/
                 this.enemies.Add(enemy);
                 room.enemies.Add(enemy);
             }
@@ -194,7 +260,6 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
             {
                 if (this.bossRoomIDs.Contains(i))
                 {
-                    Debug.Log("JESTEM W BOSS ROOMIE WIEC BREJKUJE WYJSCIE!");
                     break;
                 }
 
@@ -210,6 +275,7 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
                     int rotationAngles = DetermineRotationOfTeleport(exitTileToMark, finalizedRooms[i].FloorTiles);
 
                     GenerateRoomExitPrefab(exitTileToMark, rotationAngles);
+                    CreateWallTilesAroundTeleport(exitTileToMark, finalizedRooms[i].FloorTiles, finalizedRooms[i].WallTiles);
                     break;
                 }
                 loopIt++;
@@ -235,13 +301,45 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
                 finalizedRooms[i + 1].entrance.teleportToRoomId = i;
                 DeleteSingleTile(entranceTileToMark);
 
-                int rotationAngles = DetermineRotationOfTeleport(entranceTileToMark, finalizedRooms[i+1].FloorTiles);
-
+                int rotationAngles = DetermineRotationOfTeleport(entranceTileToMark, finalizedRooms[i + 1].FloorTiles);
                 GenerateRoomEntrancePrefab(entranceTileToMark, rotationAngles);
+                CreateWallTilesAroundTeleport(entranceTileToMark, finalizedRooms[i + 1].FloorTiles, finalizedRooms[i + 1].WallTiles);
                 break;
 
             }
         }
+    }
+
+    private void CreateWallTilesAroundTeleport(Vector2Int tileToMark,
+        HashSet<Vector2Int> floorTiles, HashSet<Vector2Int> wallTiles)
+    {
+        int tileX = tileToMark.x;
+        int tileY = tileToMark.y;
+        HashSet<Vector2Int> additionalWallTiles = new HashSet<Vector2Int>();
+
+        if (!floorTiles.Contains(new Vector2Int(tileX, tileY + 1))
+            && !wallTiles.Contains(new Vector2Int(tileX, tileY + 1)))
+        {
+            additionalWallTiles.Add(new Vector2Int(tileX, tileY + 1));
+        }
+        if (!floorTiles.Contains(new Vector2Int(tileX, tileY - 1))
+            && !wallTiles.Contains(new Vector2Int(tileX, tileY - 1)))
+        {
+            additionalWallTiles.Add(new Vector2Int(tileX, tileY - 1));
+        }
+        if (!floorTiles.Contains(new Vector2Int(tileX + 1, tileY))
+            && !wallTiles.Contains(new Vector2Int(tileX + 1, tileY)))
+        {
+            additionalWallTiles.Add(new Vector2Int(tileX + 1, tileY));
+        }
+        if (!floorTiles.Contains(new Vector2Int(tileX - 1, tileY))
+            && !wallTiles.Contains(new Vector2Int(tileX - 1, tileY)))
+        {
+            additionalWallTiles.Add(new Vector2Int(tileX - 1, tileY));
+        }
+
+        WallGenerator.GenerateWallsInGivenLocations(additionalWallTiles, tilemapVisualizer);
+
     }
 
     private void CreateTeleportToLocations(Dictionary<int, Room> finalizedRooms)
@@ -266,7 +364,7 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
 
     private int DetermineStartingRoom(int rangeOfRooms)
     {
-        return 0;/*UnityEngine.Random.Range(0, rangeOfRooms);*/
+        return 0;
     }
 
     private int DetermineBossRoom(int startingRoomID, int roomsAmount)
@@ -276,11 +374,13 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
 
     private int DetermineTreasureRoom(int startingRoomID, int bossRoomID, List<int> currentTreasureRooms, int roomsAmount)
     {
-        int treasureRoomId = 0;
+        int treasureRoomId;
+        UnityEngine.Random.InitState(this.seed);
+
         if (currentTreasureRooms.Count >= roomsAmount - 2) return currentTreasureRooms[0];
         do
         {
-            treasureRoomId = UnityEngine.Random.Range(0, roomsAmount);
+            treasureRoomId = UnityEngine.Random.Range(1, roomsAmount - 1);
         } while (treasureRoomId == startingRoomID || treasureRoomId == bossRoomID || currentTreasureRooms.Contains(treasureRoomId));
 
         return treasureRoomId;
@@ -324,12 +424,12 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         return returnRooms;
     }
 
-    private void GenerateTreasureRoomsPrefabs(HashSet<Vector2Int> roomTiles)
+    private void GenerateTreasureRoomsPrefabs(HashSet<Vector2Int> roomTiles, Dictionary<string, int> treasureContent)
     {
         Vector2Int position = DetermineRoomCenter(roomTiles);
         GameObject cosTam = Instantiate(this.treasurePrefab, (Vector3Int)position, Quaternion.identity);
         this.treasures.Add(cosTam);
-
+        cosTam.GetComponent<Treasure>().SetContent(treasureContent);
     }
 
     private void GenerateRoomExitPrefab(Vector2Int position, int rotationAngles)
@@ -383,12 +483,6 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         {
             newPosition = CalculateProperRoomTileAroundTeleportLocation(roomFloorTiles, teleportLocation, 1);
         }
-
-        /* foreach(Vector2Int roomTile in roomFloorTiles) {
-             Debug.Log(roomTile);
-         }
- */
-        /*Debug.Log("TELEPORT LOCATION: "+teleportLocation);*/
 
         return newPosition;
     }

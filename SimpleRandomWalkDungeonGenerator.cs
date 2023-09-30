@@ -9,10 +9,24 @@ public class SimpleRandomWalkDungeonGenerator : AbstractDungeonGenerator
     [SerializeField]
     protected SimpleRandomWalkSO randomWalkParameters;
     [SerializeField]
-    protected bool isSeeded = false;
+    protected bool isSeeded;
     [SerializeField]
     protected int seed;
 
+    public void Start()
+    {
+        if (this.isSeeded)
+        {
+            Debug.Log("SEEDED");
+            UnityEngine.Random.InitState(this.seed);
+        }
+        else
+        {
+            Debug.Log("NOT SEEDED");
+            UnityEngine.Random.InitState(UnityEngine.Random.Range(0,int.MaxValue));
+        }
+        
+    }
 
     protected override void RunProceduralGeneration(){
         HashSet<Vector2Int> floorPositions = RunRandomWalk(randomWalkParameters, startRandomWalkPosition);
@@ -27,13 +41,19 @@ public class SimpleRandomWalkDungeonGenerator : AbstractDungeonGenerator
     protected HashSet<Vector2Int> RunRandomWalk(SimpleRandomWalkSO parameters, Vector2Int position){
         var currentPosition = position;
         HashSet<Vector2Int> floorPositions = new HashSet<Vector2Int>();
-        System.Random randomizer = new System.Random();
+        /*System.Random randomizer = new System.Random();*/
+
+       /* if (this.isSeeded)
+        {
+            UnityEngine.Random.InitState(this.seed);
+        }*/
 
         for (int i=0; i<randomWalkParameters.iterations; i++){
             var path = ProceduralGenerationAlgorithms.SimpleRandomWalk(currentPosition, randomWalkParameters.walkLength, this.isSeeded, this.seed);
             floorPositions.UnionWith(path);
             if(randomWalkParameters.startRandomlyEachIteration){
-                currentPosition = floorPositions.ElementAt(randomizer.Next(0,floorPositions.Count));
+                /*currentPosition = floorPositions.ElementAt(randomizer.Next(0,floorPositions.Count));*/
+                currentPosition = floorPositions.ElementAt(UnityEngine.Random.Range(0, floorPositions.Count));
             }
         }
 

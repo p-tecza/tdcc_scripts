@@ -17,6 +17,11 @@ public class GameController : MonoBehaviour
     private PlayerController characterController;
 
     public TMP_Text tmpCoinsAmount;
+    public TMP_Text playerToughness;
+    public TMP_Text playerAttackDamage;
+    public TMP_Text playerAttackRange;
+    public TMP_Text playerAttackSpeed;
+    public TMP_Text playerMovementSpeed;
 
     [SerializeField]
     private Camera mainCamera;
@@ -33,6 +38,8 @@ public class GameController : MonoBehaviour
         mainCamera.transform.position = startPosition;
         characterController.SetUpCharacter();
         characterController.enabled = true;
+        PlayerStats ps = playerObject.GetComponent<PlayerController>().GetStats();
+        UpdateUIPlayerStats(ps);
     }
 
     // Update is called once per frame
@@ -51,5 +58,14 @@ public class GameController : MonoBehaviour
     {
         this.gameOverScreen.GameOverScreenPopUp();
     }
+
+    private void UpdateUIPlayerStats(PlayerStats ps)
+    {
+        this.playerToughness.text = ps.toughness.ToString();
+        this.playerAttackDamage.text = ps.attackDamage.ToString();
+        this.playerAttackRange.text = ps.attackRange.ToString();
+        this.playerAttackSpeed.text = ps.attackSpeed.ToString();
+        this.playerMovementSpeed.text = ps.movementSpeed.ToString();
+}
 
 }

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,13 +11,18 @@ public class PlayerController : MonoBehaviour
     public GameController gameController;
     public Animator animator;
 
-    [SerializeField]
+/*    [SerializeField]
     [Range(0.1f, 2f)]
-    private float moveSpeed = 0.1f;
+    private float moveSpeed = 0.1f;*/
 
     [SerializeField]
     [Range(0.1f, 3f)]
     private float enterRoomIdleDelay = 0.4f;
+
+    [SerializeField]
+    private int onCollisionDamage = 10;
+
+    private bool collisionDamagable;
 
     public int moneyAmount;
 
@@ -30,18 +36,28 @@ public class PlayerController : MonoBehaviour
     private bool isRunning;
     private bool isAttacking;
 
+    private bool stopAllActions;
+
 
     // STATS
+
+    public PlayerStats stats;
 
     [SerializeField]
     private int playerMaxHealth;
     private int playerCurrentHealth;
+    [SerializeField]
+    private int playerToughness;
     [SerializeField]
     private int playerAttackDamage;
     [SerializeField]
     private float playerAttackSpeed;
     [SerializeField]
     private float playerAttackRange;
+    [SerializeField]
+    private float playerMovementSpeed;
+    [SerializeField]
+    private AttackType playerAttackType;
     [SerializeField]
     private Transform playerAttackPoint;
     [SerializeField]
@@ -62,6 +78,18 @@ public class PlayerController : MonoBehaviour
         this.enableMovement = true;
         this.currentRoom = this.roomInfo[this.startingRoomID];
         this.playerCurrentHealth = this.playerMaxHealth;
+        this.stopAllActions = false;
+
+        this.stats = new PlayerStats(
+            this.playerMaxHealth,
+            this.playerToughness,
+            this.playerAttackDamage,
+            this.playerAttackSpeed,
+            this.playerAttackRange,
+            this.playerMovementSpeed,
+            this.playerAttackType
+            );
+            
     }
 
     void FixedUpdate()
@@ -80,26 +108,26 @@ public class PlayerController : MonoBehaviour
             
             this.animator.SetBool("isRunning", isRunning);
 
-            if (Input.GetKey(KeyCode.W) && !isAttacking)
+            if (Input.GetKey(KeyCode.W) && !isAttacking && !this.stopAllActions)
             {
-                this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(0, moveSpeed, 0);
+                this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(0, this.stats.movementSpeed, 0);
             }
 
-            if (Input.GetKey(KeyCode.S) && !isAttacking)
+            if (Input.GetKey(KeyCode.S) && !isAttacking && !this.stopAllActions)
             {
-                this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(0, -moveSpeed, 0);
+                this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(0, -this.stats.movementSpeed, 0);
             }
 
-            if (Input.GetKey(KeyCode.A) && !isAttacking)
+            if (Input.GetKey(KeyCode.A) && !isAttacking && !this.stopAllActions)
             {
-                this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(-moveSpeed, 0, 0);
+                this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(-this.stats.movementSpeed, 0, 0);
                 this.playerObject.transform.rotation = new Quaternion(this.playerObject.transform.rotation.x,
                             0f, this.playerObject.transform.rotation.z, this.playerObject.transform.rotation.w);
             }
 
-            if (Input.GetKey(KeyCode.D) && !isAttacking)
+            if (Input.GetKey(KeyCode.D) && !isAttacking && !this.stopAllActions)
             {
-                this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(moveSpeed, 0, 0);
+                this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(this.stats.movementSpeed, 0, 0);
                 this.playerObject.transform.rotation = new Quaternion(this.playerObject.transform.rotation.x,
                             180f, this.playerObject.transform.rotation.z, this.playerObject.transform.rotation.w);
 
@@ -119,7 +147,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && !this.stopAllActions)
         {
             this.animator.SetTrigger("attack");
             this.isAttacking = true;
@@ -176,6 +204,23 @@ public class PlayerController : MonoBehaviour
 
         }
 
+        if(collision.gameObject.tag == "Enemy")
+        {
+            TakeDamage(this.onCollisionDamage);
+        }
+
+        if(collision.gameObject.tag == "TreasureChest")
+        {
+            collision.gameObject.GetComponent<Treasure>().DropItems(this.transform);
+        }
+
+        if (collision.gameObject.tag == "Coin")
+        {
+            Destroy(collision.gameObject);
+            PickUpCoin();
+            Debug.Log(this.moneyAmount);
+        }
+
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -186,7 +231,9 @@ public class PlayerController : MonoBehaviour
             PickUpCoin();
             Debug.Log(this.moneyAmount);
         }
+
     }
+
 
     void AttackAnimationEnd()
     {
@@ -196,12 +243,12 @@ public class PlayerController : MonoBehaviour
 
     void DealDamage()
     {
-        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(playerAttackPoint.position, playerAttackRange, enemyLayer);
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(playerAttackPoint.position, this.stats.attackRange, enemyLayer);
 
         foreach(Collider2D enemy in hitEnemies)
         {
             Debug.Log("Hit: " + enemy.name);
-            enemy.GetComponent<Enemy>().TakeDamage(this.playerAttackDamage);
+            enemy.GetComponent<Enemy>().TakeDamage(this.stats.attackDamage);
         }
 
     }
@@ -218,8 +265,12 @@ public class PlayerController : MonoBehaviour
     }
     public void TakeDamage(int dmg)
     {
+
+        if (this.stopAllActions) return;
+
         this.playerCurrentHealth -= dmg;
 
+        this.animator.SetBool("isRunning", false);
         this.animator.SetTrigger("hurt");
 
         Debug.Log("MOJE HP: " + this.playerCurrentHealth);
@@ -231,9 +282,10 @@ public class PlayerController : MonoBehaviour
             this.playerCurrentHealth = 0;
             Debug.Log("PLAYER UMIERA");
             this.animator.SetTrigger("dead");
+            this.stopAllActions = true;
         }
-        else if ((float)this.playerCurrentHealth / this.playerMaxHealth < 0.3) this.healthSliderFill.color = Color.red;
-        else if ((float)this.playerCurrentHealth / this.playerMaxHealth < 0.6) this.healthSliderFill.color = Color.yellow;
+        else if ((float)this.playerCurrentHealth / this.playerMaxHealth < 0.3) this.healthSliderFill.color = UnityEngine.Color.red;
+        else if ((float)this.playerCurrentHealth / this.playerMaxHealth < 0.6) this.healthSliderFill.color = UnityEngine.Color.yellow;
 
         this.healthSlider.value = (float)this.playerCurrentHealth / this.playerMaxHealth;
 
@@ -266,7 +318,17 @@ public class PlayerController : MonoBehaviour
     {
         if (playerAttackPoint == null)
             return;
-        Gizmos.DrawWireSphere(playerAttackPoint.position, playerAttackRange);
+        Gizmos.DrawWireSphere(playerAttackPoint.position, this.playerAttackRange);
+    }
+
+    public Room GetCurrentlyActivatedRoom()
+    {
+        return this.currentRoom;
+    }
+
+    public PlayerStats GetStats()
+    {
+        return this.stats;
     }
 
 }
