@@ -18,7 +18,7 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
 
     public GameObject availableTreasures;
     public GameObject treasurePrefab, enemyPrefab, rangeEnemyPrefab, coinsPrefab;
-    public GameObject teleportInPrefab, teleportOutPrefab;
+    public GameObject teleportInPrefab, teleportPrefab;
 
     public List<GameObject> treasures = new List<GameObject>();
     public List<GameObject> enemies = new List<GameObject>();
@@ -126,7 +126,7 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
 
         startingRoomID = DetermineStartingRoom(bspRoomsAmount);
         this.startingPosition = CalculateStartingPosition(finalizedRooms[startingRoomID].FloorTiles);
-        this.bossRoomIDs.Add(DetermineBossRoom(startingRoomID, finalizedRooms.Count));
+        this.bossRoomIDs.Add(bossRoomIdentifier);
 
 
         int amountOfPossibleTreasures = this.availableTreasures.transform.childCount;
@@ -148,12 +148,12 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
 
 
 
-        finalizedRooms = GeneratePrimitiveConnections(finalizedRooms);
-        CreatePassagesBetweenRooms(finalizedRooms);
+        /*finalizedRooms = GeneratePrimitiveConnections(finalizedRooms);*/
+        /*CreatePassagesBetweenRooms(finalizedRooms);*/
 
-        CreateNonLinearPassagesBetweenRooms(finalizedRooms, GridAlgorithm.gg);
+        finalizedRooms = CreateNonLinearPassagesBetweenRooms(finalizedRooms, GridAlgorithm.gg);
 
-        CreateTeleportToLocations(finalizedRooms);
+        /*CreateTeleportToLocations(finalizedRooms);*/
         GenerateEnemies();
         GenerateCoins();
 
@@ -275,7 +275,7 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
 
     }
 
-    private void CreateNonLinearPassagesBetweenRooms(Dictionary<int, Room> finalizedRooms, GridAlgorithm.GridGraph gg)
+    private Dictionary<int, Room> CreateNonLinearPassagesBetweenRooms(Dictionary<int, Room> finalizedRooms, GridAlgorithm.GridGraph gg)
     {
 
         foreach(GraphConnection gc in gg.connections)
@@ -283,21 +283,33 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
             //teleport z
             Room parentRoom = finalizedRooms[gc.parentNode];
             Room childRoom = finalizedRooms[gc.childNode];
-            Teleport parentRoomTeleport = new Teleport();
-            TeleportOrientationHelper.DefineLocationOfTeleports(gc, gg, parentRoom, childRoom);
-            /*parentRoom.teleports.Add(new Teleport());*/
-
-
-            //teleport do
-
+            Teleport parentRoomTeleport, childRoomTeleport;
+            (parentRoomTeleport, childRoomTeleport) = TeleportOrientationHelper.DefineLocationOfTeleports(gc, gg, parentRoom, childRoom);
+            finalizedRooms[gc.parentNode].teleports.Add(parentRoomTeleport);
+            finalizedRooms[gc.childNode].teleports.Add(childRoomTeleport);
         }
+        RearrangeMapWithTeleports(finalizedRooms);
+        return finalizedRooms;
+    }
 
+    private void RearrangeMapWithTeleports(Dictionary<int, Room> finalizedRooms)
+    {
+        foreach(Room room in finalizedRooms.Values) 
+        {
+            foreach(Teleport t in room.teleports){
+                Vector2Int tileToMark = t.teleportFrom;
+                DeleteSingleTile(tileToMark);
+                int rotationAngles = DetermineRotationOfTeleport(tileToMark, room.FloorTiles);
+                GenerateTeleportPrefab(tileToMark, rotationAngles, t);
+                CreateWallTilesAroundTeleport(tileToMark, room.FloorTiles, room.WallTiles);
+            }
+        }
     }
 
     
 
 
-    private void CreatePassagesBetweenRooms(Dictionary<int, Room> finalizedRooms)
+   /* private void CreatePassagesBetweenRooms(Dictionary<int, Room> finalizedRooms)
     {
         for (int i = 0; i < finalizedRooms.Count - 1; i++)
         {
@@ -360,7 +372,7 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
 
             }
         }
-    }
+    }*/
 
     private void CreateWallTilesAroundTeleport(Vector2Int tileToMark,
         HashSet<Vector2Int> floorTiles, HashSet<Vector2Int> wallTiles)
@@ -394,7 +406,7 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
 
     }
 
-    private void CreateTeleportToLocations(Dictionary<int, Room> finalizedRooms)
+/*    private void CreateTeleportToLocations(Dictionary<int, Room> finalizedRooms)
     {
 
         foreach (var room in finalizedRooms)
@@ -408,10 +420,7 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
                     room.Value.FloorTiles, room.Value.exit.teleportFrom);
             }
         }
-
-
-
-    }
+    }*/
 
 
     private int DetermineStartingRoom(int rangeOfRooms)
@@ -419,10 +428,10 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         return 0;
     }
 
-    private int DetermineBossRoom(int startingRoomID, int roomsAmount)
+/*    private int DetermineBossRoom(int startingRoomID, int roomsAmount)
     {
         return startingRoomID > roomsAmount - startingRoomID - 1 ? 0 : roomsAmount - 1;
-    }
+    }*/
 
     private int DetermineTreasureRoom(int startingRoomID, int bossRoomID, List<int> currentTreasureRooms, int roomsAmount)
     {
@@ -451,10 +460,10 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         tilemapVisualizer.DeleteSingleTile(singleWallTile);
     }
 
-    private Dictionary<int, Room> GeneratePrimitiveConnections(Dictionary<int, Room> finalizedRooms)
+/*    private Dictionary<int, Room> GeneratePrimitiveConnections(Dictionary<int, Room> finalizedRooms)
     {
         Dictionary<int, Room> returnRooms = new Dictionary<int, Room>();
-        /*Dictionary<int,int> newDict = new Dictionary<int,int>();*/
+        *//*Dictionary<int,int> newDict = new Dictionary<int,int>();*//*
         for (int i = 0; i < finalizedRooms.Count; i++)
         {
 
@@ -474,7 +483,7 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         }
 
         return returnRooms;
-    }
+    }*/
 
     private void GenerateTreasureRoomsPrefabs(HashSet<Vector2Int> roomTiles, Dictionary<string, int> treasureContent)
     {
@@ -484,12 +493,13 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         cosTam.GetComponent<Treasure>().SetContent(treasureContent);
     }
 
-    private void GenerateRoomExitPrefab(Vector2Int position, int rotationAngles)
+    private void GenerateTeleportPrefab(Vector2Int position, int rotationAngles, Teleport t)
     {
         Vector3 fixedPosition = new Vector3(position.x + 0.5f, position.y + 0.5f, 0);
         Quaternion rotation = Quaternion.Euler(0, 0, rotationAngles);
-        GameObject exitObject = Instantiate(this.teleportOutPrefab, fixedPosition, rotation);
-        this.exits.Add(exitObject);
+        GameObject teleportObject = Instantiate(this.teleportPrefab, fixedPosition, rotation);
+        teleportObject.GetComponent<TeleportMonoBehaviour>().teleportInfo = t;
+        /*this.exits.Add(exitObject);*/
     }
 
     private void GenerateRoomEntrancePrefab(Vector2Int position, int rotationAngles)
@@ -586,11 +596,11 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
             DestroyImmediate(go);
             Debug.Log("DESTROYING " + go.ToString());
         }
-        foreach (GameObject go in this.exits)
+/*        foreach (GameObject go in this.exits)
         {
             DestroyImmediate(go);
             Debug.Log("DESTROYING " + go.ToString());
-        }
+        }*/
         foreach (GameObject go in this.entrances)
         {
             DestroyImmediate(go);
@@ -599,7 +609,7 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         this.treasures = new List<GameObject>();
         this.enemies = new List<GameObject>();
         this.coins = new List<GameObject>();
-        this.exits = new List<GameObject>();
+/*        this.exits = new List<GameObject>();*/
         this.entrances = new List<GameObject>();
     }
 

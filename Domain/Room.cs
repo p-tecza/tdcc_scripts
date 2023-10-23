@@ -26,6 +26,7 @@ public class Room
         this.RoomObjects = new HashSet<GameObject>();
         this.enemies = new List<GameObject>();
         this.connections = new List<int>();
+        this.teleports = new List<Teleport>();
         this.isComplex = isComplex; 
     }
 

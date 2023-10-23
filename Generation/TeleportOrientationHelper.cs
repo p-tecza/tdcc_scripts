@@ -10,34 +10,30 @@ public class TeleportOrientationHelper
 
     public  static (Teleport, Teleport) DefineLocationOfTeleports(GraphConnection gc, GridAlgorithm.GridGraph gg, Room parentRoom, Room childRoom)
     {
-        Debug.Log("IN");
         Teleport parentTeleport = new Teleport();
         Teleport childTeleport = new Teleport();
         RelativeDirection locationOfParentTeleport = DeterminePassageDirection(gc, gg);
-        Debug.Log("PARENT LOCATION: " + locationOfParentTeleport);
         RelativeDirection locationOfChildTeleport = OppositeDirection(locationOfParentTeleport);
-        Debug.Log("CHILD LOCATION: " + locationOfChildTeleport);
         Dictionary<RelativeDirection, List<Vector2Int>> parentTilesGroupedByLocation = GroupRoomTilesByLocation(parentRoom);
-        Debug.Log("PARENT TILES SIZE: " +parentTilesGroupedByLocation.Count);
         Dictionary<RelativeDirection, List<Vector2Int>> childTilesGroupedByLocation = GroupRoomTilesByLocation(childRoom);
-        Debug.Log("BEFORE SELECT");
-        parentTeleport.teleportFrom = SelectTileForParentTeleportFrom(parentTilesGroupedByLocation[locationOfParentTeleport], locationOfParentTeleport);
-        childTeleport.teleportFrom = SelectTileForParentTeleportFrom(parentTilesGroupedByLocation[locationOfChildTeleport], locationOfChildTeleport);
+        parentTeleport.teleportFrom = SelectTileForTeleportFrom(parentTilesGroupedByLocation[locationOfParentTeleport], locationOfParentTeleport);
+        childTeleport.teleportFrom = SelectTileForTeleportFrom(childTilesGroupedByLocation[locationOfChildTeleport], locationOfChildTeleport);
         parentTeleport.teleportTo = FindTeleportToLocation(childTeleport.teleportFrom, childRoom);
-        //TODO ogarnij teleportTo na podstawie 
+        childTeleport.teleportTo = FindTeleportToLocation(parentTeleport.teleportFrom, parentRoom);
+        parentTeleport.relativeLocation = locationOfParentTeleport;
+        childTeleport.relativeLocation = locationOfChildTeleport;
+        parentTeleport.teleportToRoomId = childRoom.Id;
+        childTeleport.teleportToRoomId = parentRoom.Id;
 
-        Debug.Log("AFTER SELECT");
-
-        return (null, null);
+        return (parentTeleport, childTeleport);
     }
 
-    private static Vector2Int FindTeleportToLocation(Vector2Int teleportFrom, Room childRoom)
+    private static Vector2Int FindTeleportToLocation(Vector2Int childTeleportFrom, Room childRoom)
     {
-        //TODO ogarnij tu
-        throw new System.NotImplementedException();
+        return FindProperRoomTileAroundTeleportLocation(childTeleportFrom, childRoom.FloorTiles);
     }
 
-    private static Vector2Int SelectTileForParentTeleportFrom(List<Vector2Int> availableTiles, RelativeDirection relativeLocation)
+    private static Vector2Int SelectTileForTeleportFrom(List<Vector2Int> availableTiles, RelativeDirection relativeLocation)
     {
         int sizeOfTilesCollection = availableTiles.Count;
         if(relativeLocation == RelativeDirection.West || relativeLocation == RelativeDirection.East)
@@ -68,8 +64,6 @@ public class TeleportOrientationHelper
                 chosenIndex = chosenIndex + randomOffset;
             }
         }
-
-        //tu skonczylem
 
         return availableTiles[chosenIndex];
     }
@@ -165,6 +159,47 @@ public class TeleportOrientationHelper
             return RelativeDirection.East;
         }
         return RelativeDirection.North;
+    }
+
+    private static Vector2Int FindProperRoomTileAroundTeleportLocation(Vector2Int teleportLocation, HashSet<Vector2Int> roomFloorTiles)
+    {
+        Vector2Int newPosition = CalculateProperRoomTileAroundTeleportLocation(roomFloorTiles, teleportLocation, 2);
+        if (newPosition == teleportLocation)
+        {
+            newPosition = CalculateProperRoomTileAroundTeleportLocation(roomFloorTiles, teleportLocation, 1);
+        }
+
+        return newPosition;
+    }
+
+    private static Vector2Int CalculateProperRoomTileAroundTeleportLocation(HashSet<Vector2Int> roomFloorTiles,
+    Vector2Int teleportLocation, int distance)
+    {
+
+        Vector2Int leftPosition = new Vector2Int(teleportLocation.x - distance, teleportLocation.y);
+        Vector2Int rightPosition = new Vector2Int(teleportLocation.x + distance, teleportLocation.y);
+        Vector2Int topPosition = new Vector2Int(teleportLocation.x, teleportLocation.y + distance);
+        Vector2Int bottomPosition = new Vector2Int(teleportLocation.x + 1, teleportLocation.y - distance);
+
+
+        if (roomFloorTiles.Contains(leftPosition))
+        {
+            return leftPosition;
+        }
+        else if (roomFloorTiles.Contains(rightPosition))
+        {
+            return rightPosition;
+        }
+        else if (roomFloorTiles.Contains(bottomPosition))
+        {
+            return bottomPosition;
+        }
+        else if (roomFloorTiles.Contains(topPosition))
+        {
+            return topPosition;
+        }
+        return teleportLocation;
+
     }
 
 

@@ -169,10 +169,23 @@ public class PlayerController : MonoBehaviour
         if (collision.gameObject.tag == "Teleport" && enableTeleports)
         {
 
+            Debug.Log("KOLIZJA Z TPKIEM!!!");
+
             this.isRunning = false;
             this.animator.SetBool("isRunning", isRunning);
 
-            if (this.currentRoom.exit != null && Mathf.Abs(collision.transform.position.x - this.currentRoom.exit.teleportFrom.x) < 1f
+            //-------------
+            Teleport teleportObject = collision.gameObject.GetComponent<TeleportMonoBehaviour>().teleportInfo;
+            this.enableTeleports = false;
+            this.enableMovement = false;
+            this.playerObject.transform.position = new Vector3(teleportObject.teleportTo.x, teleportObject.teleportTo.y, 0);
+            this.currentRoom = this.roomInfo[teleportObject.teleportToRoomId];
+            Invoke("EnableMovement", enterRoomIdleDelay);
+            Invoke("EnableEnemiesInRoom", enterRoomIdleDelay);
+            //-------------
+
+/*
+            if (Mathf.Abs(collision.transform.position.x - this.currentRoom.exit.teleportFrom.x) < 1f
                 && collision.transform.position.y - this.currentRoom.exit.teleportFrom.y < 1f)
             {
                 this.enableTeleports = false;
@@ -201,7 +214,7 @@ public class PlayerController : MonoBehaviour
                 Invoke("EnableMovement", enterRoomIdleDelay);
                 Invoke("EnableEnemiesInRoom", enterRoomIdleDelay);
 
-            }
+            }*/
 
 
         }
