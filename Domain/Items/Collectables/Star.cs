@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class HpPotion : MonoBehaviour
+public class Star : Collectable
 {
-    public void ControlTheHealthPotionDrop()
+/*    public void ControlTheStarDrop()
     {
-        Invoke("FreezeHealthPotionTransition", 2f);
+        Invoke("FreezeStarTransition", 2f);
     }
 
-    private void FreezeHealthPotionTransition()
+    private void FreezeStarTransition()
     {
         Rigidbody2D rigidbody2D = this.GetComponent<Rigidbody2D>();
         rigidbody2D.constraints = RigidbodyConstraints2D.FreezePosition;
-    }
+    }*/
 }

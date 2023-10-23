@@ -1,6 +1,6 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -21,8 +21,6 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField]
     private int onCollisionDamage = 10;
-
-    private bool collisionDamagable;
 
     public int moneyAmount;
 
@@ -68,6 +66,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     protected Image healthSliderFill;
 
+    [SerializeField]
+    private int ownedHpPotions;
+    [SerializeField]
+    private int ownedStars;
 
     public void SetUpCharacter()
     {
@@ -79,6 +81,11 @@ public class PlayerController : MonoBehaviour
         this.currentRoom = this.roomInfo[this.startingRoomID];
         this.playerCurrentHealth = this.playerMaxHealth;
         this.stopAllActions = false;
+        this.gameController.UpdateUICollectables(this.ownedHpPotions, this.ownedStars);
+
+        //TEMP
+        /*PrimsAlgorithm.GenerateDungeonStructure(FullDungeonGenerator.GetFinalizedRooms());*/
+        GridAlgorithm.GenerateDungeonStructure(FullDungeonGenerator.GetFinalizedRooms());
 
         this.stats = new PlayerStats(
             this.playerMaxHealth,
@@ -136,7 +143,6 @@ public class PlayerController : MonoBehaviour
             //Temporary solution
             if (Input.GetKey(KeyCode.Return) && !this.enableTeleports)
             {
-                Debug.Log("ENABLE TELEPORTS");
                 this.DisableEnemiesInRoom();
                 this.enableTeleports = true;
             }
@@ -163,8 +169,6 @@ public class PlayerController : MonoBehaviour
         if (collision.gameObject.tag == "Teleport" && enableTeleports)
         {
 
-            Debug.Log(this.currentRoom);
-            Debug.Log(collision);
             this.isRunning = false;
             this.animator.SetBool("isRunning", isRunning);
 
@@ -175,8 +179,6 @@ public class PlayerController : MonoBehaviour
                 this.enableMovement = false;
                 this.playerObject.transform.position = new Vector3(this.currentRoom.exit.teleportTo.x,
                     this.currentRoom.exit.teleportTo.y, 0);
-
-                Debug.Log("POZYCJA GRACZA PO TPKU: " + this.playerObject.transform.position);
 
                 this.currentRoom = this.roomInfo[this.currentRoom.exit.teleportToRoomId];
 
@@ -218,7 +220,21 @@ public class PlayerController : MonoBehaviour
         {
             Destroy(collision.gameObject);
             PickUpCoin();
-            Debug.Log(this.moneyAmount);
+            ResetMyVelocity();
+        }
+
+        if (collision.gameObject.tag == "Item")
+        {
+            PickUpItem(collision.gameObject);
+            Destroy(collision.gameObject);
+            ResetMyVelocity();
+        }
+
+        if(collision.gameObject.tag == "Collectable")
+        {
+            PickUpCollectable(collision.gameObject);
+            Destroy(collision.gameObject);
+            ResetMyVelocity();
         }
 
     }
@@ -229,11 +245,40 @@ public class PlayerController : MonoBehaviour
         {
             Destroy(collision.gameObject);
             PickUpCoin();
-            Debug.Log(this.moneyAmount);
         }
 
     }
 
+    private void PickUpCollectable(GameObject collectableObject)
+    {
+        string collectableName = collectableObject.name;
+        if(collectableName == "HealthPotion(Clone)")
+        {
+            this.ownedHpPotions++;
+        }
+        else if(collectableName == "Star(Clone)")
+        {
+            this.ownedStars++;
+        }
+
+        this.gameController.UpdateUICollectables(this.ownedHpPotions, this.ownedStars);
+    }
+    private void PickUpItem(GameObject itemObject)
+    {
+        Item item = itemObject.GetComponent<Item>();
+        ApplyItemStats(item);
+        this.gameController.UpdateUIPlayerStats(GetStats());
+    }
+
+    private void ApplyItemStats(Item item)
+    {
+        //TODO do ogarniêcia wartoœci graniczne (0 i jakis cap gorny)
+        this.stats.attackSpeed += item.attackSpeed;
+        this.stats.attackDamage += item.attackDamage;
+        this.stats.attackRange += item.attackRange;
+        this.stats.toughness += item.toughness;
+        this.stats.movementSpeed += item.movementSpeed;
+    }
 
     void AttackAnimationEnd()
     {
@@ -247,7 +292,6 @@ public class PlayerController : MonoBehaviour
 
         foreach(Collider2D enemy in hitEnemies)
         {
-            Debug.Log("Hit: " + enemy.name);
             enemy.GetComponent<Enemy>().TakeDamage(this.stats.attackDamage);
         }
 
@@ -269,18 +313,17 @@ public class PlayerController : MonoBehaviour
         if (this.stopAllActions) return;
 
         this.playerCurrentHealth -= dmg;
+        ResetMyVelocity();
 
         this.animator.SetBool("isRunning", false);
         this.animator.SetTrigger("hurt");
 
-        Debug.Log("MOJE HP: " + this.playerCurrentHealth);
-        Debug.Log("MOJE MAX HP: " + this.playerMaxHealth);
 
         if (this.playerCurrentHealth <= 0)
         {
             this.healthSlider.value = 0;
             this.playerCurrentHealth = 0;
-            Debug.Log("PLAYER UMIERA");
+
             this.animator.SetTrigger("dead");
             this.stopAllActions = true;
         }
@@ -288,8 +331,6 @@ public class PlayerController : MonoBehaviour
         else if ((float)this.playerCurrentHealth / this.playerMaxHealth < 0.6) this.healthSliderFill.color = UnityEngine.Color.yellow;
 
         this.healthSlider.value = (float)this.playerCurrentHealth / this.playerMaxHealth;
-
-
     }
 
     private void EnableMovement()
@@ -314,11 +355,10 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmosSelected()
+    private void ResetMyVelocity()
     {
-        if (playerAttackPoint == null)
-            return;
-        Gizmos.DrawWireSphere(playerAttackPoint.position, this.playerAttackRange);
+        gameObject.GetComponent<Rigidbody2D>().velocity = Vector3.zero;
+        gameObject.GetComponent<Rigidbody2D>().angularVelocity = 0;
     }
 
     public Room GetCurrentlyActivatedRoom()
@@ -329,6 +369,31 @@ public class PlayerController : MonoBehaviour
     public PlayerStats GetStats()
     {
         return this.stats;
+    }
+
+    public void UseHealthPotion()
+    {
+        if(this.ownedHpPotions > 0)
+        {
+            this.playerCurrentHealth += HpPotion.healthPower;
+            SetSlider((float)this.playerCurrentHealth / this.playerMaxHealth);
+            this.ownedHpPotions--;
+            this.gameController.UpdateUICollectables(this.ownedHpPotions, this.ownedStars);
+        }
+    }
+    private void SetSlider(float sliderValue)
+    {
+        this.healthSlider.value = sliderValue;
+        if (sliderValue < 0.3) this.healthSliderFill.color = UnityEngine.Color.red;
+        else if (sliderValue < 0.6) this.healthSliderFill.color = UnityEngine.Color.yellow;
+        else this.healthSliderFill.color = new Color(0, 0.6f, 0);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (playerAttackPoint == null)
+            return;
+        Gizmos.DrawWireSphere(playerAttackPoint.position, this.playerAttackRange);
     }
 
 }

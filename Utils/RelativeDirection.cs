@@ -1,4 +1,4 @@
-public enum FacingTowards{
+public enum RelativeDirection{
     North,
     South,
     East,

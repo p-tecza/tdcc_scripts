@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class Bones : Item
 {
-
-
+    protected override void SpecificItemAction()
+    {
+        throw new System.NotImplementedException();
+    }
 
 }

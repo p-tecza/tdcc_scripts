@@ -22,6 +22,8 @@ public class GameController : MonoBehaviour
     public TMP_Text playerAttackRange;
     public TMP_Text playerAttackSpeed;
     public TMP_Text playerMovementSpeed;
+    public TMP_Text ownedHpPots;
+    public TMP_Text ownedStars;
 
     [SerializeField]
     private Camera mainCamera;
@@ -59,13 +61,19 @@ public class GameController : MonoBehaviour
         this.gameOverScreen.GameOverScreenPopUp();
     }
 
-    private void UpdateUIPlayerStats(PlayerStats ps)
+    public void UpdateUIPlayerStats(PlayerStats ps)
     {
         this.playerToughness.text = ps.toughness.ToString();
         this.playerAttackDamage.text = ps.attackDamage.ToString();
         this.playerAttackRange.text = ps.attackRange.ToString();
         this.playerAttackSpeed.text = ps.attackSpeed.ToString();
         this.playerMovementSpeed.text = ps.movementSpeed.ToString();
-}
+    }
+
+    public void UpdateUICollectables(int hpPotsAmount, int starsAmount)
+    {
+        this.ownedHpPots.text = hpPotsAmount.ToString();
+        this.ownedStars.text = starsAmount.ToString();
+    }
 
 }

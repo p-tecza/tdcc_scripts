@@ -4,5 +4,9 @@ using UnityEngine;
 
 public class GoldenKey : Item
 {
+    protected override void SpecificItemAction()
+    {
+        throw new System.NotImplementedException();
+    }
 
 }

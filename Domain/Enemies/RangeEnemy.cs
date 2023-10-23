@@ -1,19 +1,17 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
-using Unity.VisualScripting.Antlr3.Runtime.Collections;
-using Unity.VisualScripting.FullSerializer.Internal;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class BasicEnemy : Enemy
+public class RangeEnemy : Enemy
 {
     public GameObject player;
-    public Animator animator;
-    public Transform basicEnemyAttackPoint;
-    public float basicEnemyAttackRange;
+    public GameObject projectile;
+
+    public AttackType attackType;
+    public float enemyAttackRange;
+    public float enemyProjectileSpeed;
     public int enemyAttackDamage;
     [SerializeField]
     private LayerMask playerLayer;
@@ -40,13 +38,17 @@ public class BasicEnemy : Enemy
 
     private bool ignoreAvoidance = false;
 
+    private float timer = 0f;
+
     void Start()
     {
         this.currentHealth = this.healthPoints;
-        BoxCollider2D enemyCollider = gameObject.GetComponent<BoxCollider2D>();
-        this.colliderWidth = enemyCollider.size.x;
-        this.colliderHeight = enemyCollider.size.y;
-        this.GetComponent<Animator>().SetFloat("attackSpeedMultiplier", this.attackSpeed);
+        CircleCollider2D enemyCollider = gameObject.GetComponent<CircleCollider2D>();
+        this.colliderWidth = enemyCollider.radius*2;
+        this.colliderHeight = enemyCollider.radius*2;
+        /*this.GetComponent<Animator>().SetFloat("attackSpeedMultiplier", this.attackSpeed);*/
+
+
         collisionSensors = new List<Vector2>()
         {
             new Vector2(0,0),
@@ -59,39 +61,37 @@ public class BasicEnemy : Enemy
             new Vector2(0, -this.colliderHeight/2),
             new Vector2(0, this.colliderHeight/2)
         };
-
-        InitializeHitRangeExtension();
-        /* Physics2D.IgnoreLayerCollision(6, 7); // 6 - enemies, 7 - player*/
     }
 
     void FixedUpdate()
     {
 
-        this.colliderCenter = gameObject.GetComponent<BoxCollider2D>().bounds.center;
+        this.colliderCenter = gameObject.GetComponent<CircleCollider2D>().bounds.center;
+
+        if(this.timer < attackSpeed)
+        {
+            this.timer += Time.deltaTime;
+        }
 
         float step = this.movementSpeed * Time.deltaTime;
         if (this.isActive)
         {
-
-            this.animator.SetBool("isRunning", isRunning);
-            this.animator.SetBool("isAttacking", isAttacking);
-            /*            this.animator.SetBool("isDead", isDead);
-                        this.animator.SetBool("isHurt", isHurt);*/
-
             if (this.obstacleAvoidToMove > 0 && !this.ignoreAvoidance)
             {
-                // MASZ OBSTACLE AVOID VECTOR I OBSTACLE AVOID TO MOVE, na tym pracuj
-
                 this.transform.position += this.obstacleAvoidVector;
                 this.obstacleAvoidToMove -= this.obstacleAvoidVector.x == 0 ?
                     Math.Abs(this.obstacleAvoidVector.y) : Math.Abs(this.obstacleAvoidVector.x);
             }
-            else if (Vector3.Distance(this.basicEnemyAttackPoint.position, player.transform.position)
-                < this.basicEnemyAttackRange + this.playerHitBoxBound[this.facingTowards])
+            else if (DetermineIfInShootingRange())
             {
-                this.StartAttacking();
+                if(timer >= attackSpeed)
+                {
+                    this.RangeAttack();
+                    this.timer = 0f;
+                }
+                
             }
-            else if (this.transform.position.x > player.transform.position.x && CheckIfAnimationsEnded())
+            else if (this.transform.position.x > player.transform.position.x)
             {
                 this.StartRunning();
                 this.transform.rotation = new Quaternion(this.transform.rotation.x,
@@ -146,7 +146,7 @@ public class BasicEnemy : Enemy
                 this.facingTowards = RelativeDirection.West;
 
             }
-            else if (CheckIfAnimationsEnded())
+            else
             {
                 this.StartRunning();
                 this.transform.rotation = new Quaternion(this.transform.rotation.x,
@@ -204,13 +204,6 @@ public class BasicEnemy : Enemy
     public override void ActivateEnemy()
     {
         this.isActive = true;
-
-        //TODO cos zepsute jest z tymi tile'ami, ogarnij jak one sie rozkladaja
-        List<Vector2Int> list = player.GetComponent<PlayerController>().GetCurrentlyActivatedRoom().WallTiles.ToList();
-
-
-        /*CalculateVectorWithoutObstacles(DetermineMovementVector(this.transform.position,
-            player.transform.position, this.movementSpeed * Time.deltaTime));*/
     }
 
     public override void DeactivateEnemy()
@@ -221,17 +214,16 @@ public class BasicEnemy : Enemy
     public override void TakeDamage(int damageTaken)
     {
         this.currentHealth -= damageTaken;
-        this.animator.SetTrigger("gotHurt");
+
         if (this.currentHealth <= 0)
         {
             this.currentHealth = 0;
             ResetAllStatesToFalse();
-            this.animator.SetBool("isAttacking", isAttacking);
-            this.animator.SetBool("isRunning", isRunning);
+
             this.isActive = false;
             this.GetComponent<Collider2D>().enabled = false;
             /*  this.GetComponent<Canvas>().enabled = false;*/
-            this.animator.SetTrigger("gotKilled");
+
             Destroy(gameObject, this.destroyBodyAfterSeconds);
         }
         else if ((float)this.currentHealth / this.healthPoints < 0.3) this.healthSliderFill.color = Color.red;
@@ -243,14 +235,7 @@ public class BasicEnemy : Enemy
 
     public override void TryDealDamage()
     {
-
-        Collider2D playerHit = Physics2D.OverlapCircle(basicEnemyAttackPoint.position, basicEnemyAttackRange, playerLayer);
-
-        if (playerHit != null)
-        {
-            playerHit.GetComponent<PlayerController>().TakeDamage(this.enemyAttackDamage);
-        }
-
+        throw new System.NotImplementedException();
     }
 
     private void StartRunning()
@@ -259,35 +244,17 @@ public class BasicEnemy : Enemy
         this.isRunning = true;
     }
 
-    private void StartAttacking()
+    private void RangeAttack()
     {
         ResetAllStatesToFalse();
         this.isAttacking = true;
+        this.Shoot(); //do dodania jakis interwal czasowy przy strzelaniu
     }
 
     private void ResetAllStatesToFalse()
     {
         this.isAttacking = false;
         this.isRunning = false;
-    }
-
-
-    private bool CheckIfAnimationsEnded()
-    {
-        return !(this.animator.GetCurrentAnimatorStateInfo(0).IsName("LightBandit_Attack")
-           || this.animator.GetCurrentAnimatorStateInfo(0).IsName("LightBandit_Hurt"));
-    }
-
-    private void InitializeHitRangeExtension()
-    {
-        this.playerBoxCollider = this.player.GetComponent<BoxCollider2D>();
-        this.playerHitBoxBound = new Dictionary<RelativeDirection, float>
-        {
-            { RelativeDirection.East, playerBoxCollider.size.x / 2 },
-            { RelativeDirection.West, playerBoxCollider.size.x / 2 },
-            { RelativeDirection.South, playerBoxCollider.size.y / 2 },
-            { RelativeDirection.North, playerBoxCollider.size.y / 2 }
-        };
     }
 
     private (bool, Vector2Int) DetermineIfObstacleInTheWay(Vector3 enemyPosition, Vector3 playerPosition, float step)
@@ -312,7 +279,7 @@ public class BasicEnemy : Enemy
         };
 
         float movementMagnitude = movementVector.magnitude;
-        List<String> availablePaths = new List<string>(); 
+        List<String> availablePaths = new List<string>();
         List<String> unavailablePaths = new List<string>();
 
         foreach (var way in ways)
@@ -327,7 +294,6 @@ public class BasicEnemy : Enemy
                 unavailablePaths.Add(way.Key);
             }
         }
-
 
         foreach (string option in availablePaths)
         {
@@ -370,7 +336,7 @@ public class BasicEnemy : Enemy
             }
         }
 
-        if(availablePaths.Count == 0)
+        if (availablePaths.Count == 0)
         {
             return movementVector;
         }
@@ -383,8 +349,8 @@ public class BasicEnemy : Enemy
                 Vector2 vector = new Vector2(movementMagnitude * ways[path].x, movementMagnitude * ways[path].y);
                 double angle = PathFinder.AngleBetween(vector, new Vector2(movementVector.x, movementVector.y));
 
-                if(minAngle > angle) 
-                { 
+                if (minAngle > angle)
+                {
                     minAngle = angle;
                     retVec = new Vector3(vector.x, vector.y, 0);
                 }
@@ -397,5 +363,37 @@ public class BasicEnemy : Enemy
         Vector3 movementVector = Vector3.MoveTowards(enemyPosition, playerPosition, step * 2) - enemyPosition;
         return movementVector;
     }
+
+    private bool DetermineIfInShootingRange()
+    {
+        Vector3 vectorBetweenEntities = this.player.transform.position - this.transform.position;
+        float distanceBetweenEntities = vectorBetweenEntities.magnitude;
+        if (distanceBetweenEntities <= this.enemyAttackRange)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    private GameObject Shoot()
+    {
+        Debug.Log("SHOOT");
+        Vector3 vectorBetweenEntities = this.player.transform.position - this.transform.position;
+        vectorBetweenEntities = Vector3.Normalize(vectorBetweenEntities);
+        float angle = Vector3.Angle(Vector3.right, vectorBetweenEntities);
+        if(vectorBetweenEntities.y < 0)
+        {
+            angle = 360 - angle;
+        }
+        Debug.Log("ANGLE: " + angle);
+        Quaternion rotationQuaternion = Quaternion.Euler(0, 0, angle);
+        GameObject projectile =
+            Instantiate(this.projectile, this.transform.position, rotationQuaternion); // <- quaterion.identity do zmiany bedzie
+        projectile.GetComponent<Projectile>().SetProjectileDamage(this.enemyAttackDamage);
+        
+        projectile.GetComponent<Rigidbody2D>().AddForce(vectorBetweenEntities * this.enemyProjectileSpeed);
+        /*projectile.transform.SetParent(this.transform, true);*/
+        return projectile;
+    } 
 
 }

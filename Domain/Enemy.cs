@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,9 +15,10 @@ public abstract class Enemy : MonoBehaviour
     [Range(0f, 10f)]
     protected float destroyBodyAfterSeconds;
     protected int currentHealth;
-    protected float movementSpeed = 1f;
-    protected float attackSpeed { get; set; }
+    public float movementSpeed;
+    public float attackSpeed;
     public bool isActive = false;
+
     public abstract void ActivateEnemy();
 
     public abstract void DeactivateEnemy();
@@ -24,4 +26,12 @@ public abstract class Enemy : MonoBehaviour
     public abstract void TakeDamage(int damageTaken);
 
     public abstract void TryDealDamage();
+
+    public void SetSlider(float sliderValue)
+    {
+        this.healthSlider.value = sliderValue;
+        if(sliderValue < 0.3) this.healthSliderFill.color = UnityEngine.Color.red;
+        else if (sliderValue < 0.6) this.healthSliderFill.color = UnityEngine.Color.yellow;
+        else this.healthSliderFill.color = new Color(0, 0.6f, 0);
+    }
 }

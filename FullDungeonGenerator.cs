@@ -17,7 +17,7 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
     protected int treasureRoomsAmount = 2;
 
     public GameObject availableTreasures;
-    public GameObject treasurePrefab, enemyPrefab, coinsPrefab;
+    public GameObject treasurePrefab, enemyPrefab, rangeEnemyPrefab, coinsPrefab;
     public GameObject teleportInPrefab, teleportOutPrefab;
 
     public List<GameObject> treasures = new List<GameObject>();
@@ -75,8 +75,6 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         int randomAspect = UnityEngine.Random.Range(0, 2);
         int bspRoomsAmount = rooms.Count;
 
-
-
         int minSwX = minX;
         int minSwY = minY;
         HashSet<Vector2Int> swRoom;
@@ -117,6 +115,15 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
 
         Debug.Log("COUNT FINALIZED ROOMS: " + finalizedRooms.Count);
 
+        // GENERACJA STRUKTURY -----------------------------
+
+        List<GraphConnection> dungeonStructure = GridAlgorithm.GenerateDungeonStructure(finalizedRooms);
+        int bossRoomIdentifier = GridAlgorithm.gg.FindFurthestNode();
+        Debug.Log("BOSS ROOM IDENTIFIER: "+bossRoomIdentifier);
+
+        // GENERACJA STRUKTURY -----------------------------
+
+
         startingRoomID = DetermineStartingRoom(bspRoomsAmount);
         this.startingPosition = CalculateStartingPosition(finalizedRooms[startingRoomID].FloorTiles);
         this.bossRoomIDs.Add(DetermineBossRoom(startingRoomID, finalizedRooms.Count));
@@ -138,8 +145,14 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         MarkRoom(finalizedRooms[startingRoomID].FloorTiles, Color.green);
         MarkRoom(finalizedRooms[this.bossRoomIDs[0]].FloorTiles, Color.red);
 
+
+
+
         finalizedRooms = GeneratePrimitiveConnections(finalizedRooms);
         CreatePassagesBetweenRooms(finalizedRooms);
+
+        CreateNonLinearPassagesBetweenRooms(finalizedRooms, GridAlgorithm.gg);
+
         CreateTeleportToLocations(finalizedRooms);
         GenerateEnemies();
         GenerateCoins();
@@ -211,7 +224,12 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
             for (int i = 0; i < randNumOfEnemies; i++)
             {
                 Vector2Int randomField = room.FloorTiles.ElementAt(UnityEngine.Random.Range(0, room.FloorTiles.Count));
-                GameObject enemy = Instantiate(this.enemyPrefab, ((Vector3Int)randomField), Quaternion.identity);
+
+                int value = UnityEngine.Random.Range(0, 3);
+
+                GameObject typeOfEnemy = DetermineTypeOfEnemy(value);
+
+                GameObject enemy = Instantiate(typeOfEnemy, ((Vector3Int)randomField), Quaternion.identity);
                 this.enemies.Add(enemy);
                 room.enemies.Add(enemy);
             }
@@ -221,6 +239,18 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
 
         }
 
+    }
+
+    private GameObject DetermineTypeOfEnemy(int value)
+    {
+        if(value < 2)
+        {
+            return this.enemyPrefab;
+        }
+        else
+        {
+            return this.rangeEnemyPrefab;
+        }
     }
 
     private void GenerateCoins()
@@ -244,6 +274,28 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         }
 
     }
+
+    private void CreateNonLinearPassagesBetweenRooms(Dictionary<int, Room> finalizedRooms, GridAlgorithm.GridGraph gg)
+    {
+
+        foreach(GraphConnection gc in gg.connections)
+        {
+            //teleport z
+            Room parentRoom = finalizedRooms[gc.parentNode];
+            Room childRoom = finalizedRooms[gc.childNode];
+            Teleport parentRoomTeleport = new Teleport();
+            TeleportOrientationHelper.DefineLocationOfTeleports(gc, gg, parentRoom, childRoom);
+            /*parentRoom.teleports.Add(new Teleport());*/
+
+
+            //teleport do
+
+        }
+
+    }
+
+    
+
 
     private void CreatePassagesBetweenRooms(Dictionary<int, Room> finalizedRooms)
     {
@@ -622,6 +674,7 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
     {
         return startingRoomID;
     }
+
 
 
 }

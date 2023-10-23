@@ -25,4 +25,17 @@ public abstract class Item : MonoBehaviour
 
     protected abstract void SpecificItemAction();
 
+    public ItemStats returnItemStats()
+    {
+        ItemStats itemStats = new ItemStats();
+        itemStats.healthPoints = healthPoints;
+        itemStats.toughness = toughness;
+        itemStats.attackDamage = attackDamage;
+        itemStats.attackSpeed = attackSpeed;
+        itemStats.attackRange = attackRange;
+        itemStats.movementSpeed = movementSpeed;
+
+        return itemStats;
+    }
+
 }

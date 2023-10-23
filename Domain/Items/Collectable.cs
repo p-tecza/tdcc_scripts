@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class Star : MonoBehaviour
+public abstract class Collectable : MonoBehaviour
 {
-    public void ControlTheStarDrop()
+
+    public void ControlTheCollectableDrop()
     {
-        Invoke("FreezeStarTransition", 2f);
+        Invoke("FreezeItemTransition", 2f);
     }
 
-    private void FreezeStarTransition()
+    private void FreezeItemTransition()
     {
         Rigidbody2D rigidbody2D = this.GetComponent<Rigidbody2D>();
         rigidbody2D.constraints = RigidbodyConstraints2D.FreezePosition;

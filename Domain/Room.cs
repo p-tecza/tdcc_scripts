@@ -14,6 +14,7 @@ public class Room
     public List<GameObject> enemies { get; set; }
     public int Id { get; set; }
     public List<int> connections { get; set; }
+    public List<Teleport> teleports { get; set; }
     public Teleport entrance { get; set; }
     public Teleport exit {  get; set; }
     public bool isComplex { get; set; }

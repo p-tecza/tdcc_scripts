@@ -59,7 +59,7 @@ public class Treasure : MonoBehaviour
                 Vector3 fixedObjectRespawn = new Vector3(thrustMainVector.x, thrustMainVector.y, 0) / 2 + this.transform.position;
                 GameObject hpPotion = Instantiate(this.healthPotion, fixedObjectRespawn, Quaternion.identity);
                 hpPotion.GetComponent<Rigidbody2D>().AddForce(thrustVector * thrustForce, ForceMode2D.Impulse);
-                hpPotion.GetComponent<HpPotion>().ControlTheHealthPotionDrop();
+                hpPotion.GetComponent<HpPotion>().ControlTheCollectableDrop();
             }
         }
 
@@ -91,7 +91,7 @@ public class Treasure : MonoBehaviour
                 Vector3 fixedObjectRespawn = new Vector3(thrustMainVector.x, thrustMainVector.y, 0) / 2 + this.transform.position;
                 GameObject starObject = Instantiate(this.star, fixedObjectRespawn, Quaternion.identity);
                 starObject.GetComponent<Rigidbody2D>().AddForce(thrustVector * thrustForce, ForceMode2D.Impulse);
-                starObject.GetComponent<Star>().ControlTheStarDrop();
+                starObject.GetComponent<Star>().ControlTheCollectableDrop();
             }
         }
 
@@ -109,7 +109,7 @@ public class Treasure : MonoBehaviour
         }
 
 
-        this.GetComponent<BoxCollider2D>().enabled = false;
+        Invoke("DisableTreasureBoxCollider", 0.25f);
         this.GetComponent<SpriteRenderer>().sprite = this.openChestSprite;
     }
 
@@ -120,4 +120,10 @@ public class Treasure : MonoBehaviour
             + "stars: " + this.additionalItems["stars"] + "\n"
             + "item: "+ this.contains;
     }
+
+    private void DisableTreasureBoxCollider()
+    {
+        this.GetComponent<BoxCollider2D>().enabled = false;
+    }
+
 }

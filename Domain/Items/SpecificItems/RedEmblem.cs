@@ -4,5 +4,9 @@ using UnityEngine;
 
 public class RedEmblem : Item
 {
+    protected override void SpecificItemAction()
+    {
+        throw new System.NotImplementedException();
+    }
 
 }
