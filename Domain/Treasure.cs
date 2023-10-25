@@ -27,12 +27,13 @@ public class Treasure : MonoBehaviour
 
     void Awake()
     {
- 
+        
     }
 
     internal void SetContent(Dictionary<string, int> treasureContent)
     {
         this.mainItemId = treasureContent["item"];
+        GameController.RemoveItemFromAvailableSpecificItemLoot(this.mainItemId);
         this.additionalItems = new Dictionary<string, int>()
         {
             {"hpPots", treasureContent["hpPots"]},

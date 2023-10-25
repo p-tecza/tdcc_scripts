@@ -31,6 +31,8 @@ public class GameController : MonoBehaviour
     [Range(1f, 10f)]
     private float cameraZoom = 1f;
 
+    private static List<int> availableSpecificItemLoot = new List<int>();
+
     // Start is called before the first frame update
     void Start()
     {
@@ -74,6 +76,20 @@ public class GameController : MonoBehaviour
     {
         this.ownedHpPots.text = hpPotsAmount.ToString();
         this.ownedStars.text = starsAmount.ToString();
+    }
+
+    public static void RemoveItemFromAvailableSpecificItemLoot(int itemId)
+    {
+        availableSpecificItemLoot.Remove(itemId);
+    }
+    public static void SetAvailableSpecificItemLoot(List<int> availableLoot)
+    {
+        availableSpecificItemLoot = availableLoot;
+    }
+
+    public static List<int> GetAvailableSpecificItemLoot()
+    {
+        return availableSpecificItemLoot;
     }
 
 }

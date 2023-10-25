@@ -70,11 +70,6 @@ public class TeleportOrientationHelper
 
     private static Dictionary<RelativeDirection, List<Vector2Int>> GroupRoomTilesByLocation(Room room)
     {
-/*        if (room.isComplex)
-        {
-            return GroupComplexRoomTilesByLocation(room);
-        }*/
-
         HashSet<Vector2Int> tiles = room.WallTiles;
 
         int minX = int.MaxValue, maxX = int.MinValue, minY = int.MaxValue, maxY = int.MinValue;
@@ -107,14 +102,6 @@ public class TeleportOrientationHelper
             { RelativeDirection.East, eastTiles },
             { RelativeDirection.West, westTiles }
         };
-    }
-
-    private static Dictionary<RelativeDirection, List<Vector2Int>> GroupComplexRoomTilesByLocation(Room room)
-    {
-
-
-
-        return null;
     }
 
     private static RelativeDirection DeterminePassageDirection(GraphConnection gc, GridAlgorithm.GridGraph gg)
@@ -163,10 +150,10 @@ public class TeleportOrientationHelper
 
     private static Vector2Int FindProperRoomTileAroundTeleportLocation(Vector2Int teleportLocation, HashSet<Vector2Int> roomFloorTiles)
     {
-        Vector2Int newPosition = CalculateProperRoomTileAroundTeleportLocation(roomFloorTiles, teleportLocation, 2);
+        Vector2Int newPosition = CalculateProperRoomTileAroundTeleportLocation(roomFloorTiles, teleportLocation, 1);
         if (newPosition == teleportLocation)
         {
-            newPosition = CalculateProperRoomTileAroundTeleportLocation(roomFloorTiles, teleportLocation, 1);
+            newPosition = CalculateProperRoomTileAroundTeleportLocation(roomFloorTiles, teleportLocation, 2);
         }
 
         return newPosition;

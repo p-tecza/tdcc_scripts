@@ -7,9 +7,6 @@ using UnityEngine;
 public class FullDungeonGenerator : RoomFirstDungeonGenerator
 {
 
-    // TODO ogarnij przechowywanie informacji o pokojach w hashsecie klasy Room, pola podlogi, sciany, id oraz polaczenia
-    // TODO dodatkowo generacja randomowych prefabow i polaczen najlepiej
-
     protected SimpleRandomWalkDungeonGenerator simpleRandomWalkDungeon;
     protected RoomFirstDungeonGenerator roomFirstDungeon;
 
@@ -131,6 +128,7 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
 
         int amountOfPossibleTreasures = this.availableTreasures.transform.childCount;
         Dictionary<string, int> treasureContent = GenerateTreasureContent(amountOfPossibleTreasures);
+        SetStateOfGlobalLoot(amountOfPossibleTreasures);
 
         for (int i = 0; i < treasureRoomsAmount; i++)
         {
@@ -157,6 +155,13 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         GenerateEnemies();
         GenerateCoins();
 
+    }
+
+    private void SetStateOfGlobalLoot(int amountOfPossibleTreasures)
+    {
+        List<int> list = new List<int>();
+        for (int i = 0; i < amountOfPossibleTreasures; i++) { list.Add(i); }
+        GameController.SetAvailableSpecificItemLoot(list);
     }
 
     private Dictionary<string, int> GetSpecificTreasureContent(Dictionary<string, int> all, int whichRoom)
@@ -280,7 +285,6 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
 
         foreach(GraphConnection gc in gg.connections)
         {
-            //teleport z
             Room parentRoom = finalizedRooms[gc.parentNode];
             Room childRoom = finalizedRooms[gc.childNode];
             Teleport parentRoomTeleport, childRoomTeleport;
@@ -305,74 +309,6 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
             }
         }
     }
-
-    
-
-
-   /* private void CreatePassagesBetweenRooms(Dictionary<int, Room> finalizedRooms)
-    {
-        for (int i = 0; i < finalizedRooms.Count - 1; i++)
-        {
-            HashSet<Vector2Int> wallTiles = finalizedRooms[i].WallTiles;
-            HashSet<Vector2Int> nextRoomWallTiles = finalizedRooms[i + 1].WallTiles;
-            int randExitPosition, randEntrancePosition;
-            randExitPosition = UnityEngine.Random.Range(0, (int)(wallTiles.Count / 2));
-            randEntrancePosition = UnityEngine.Random.Range((int)(nextRoomWallTiles.Count / 2), nextRoomWallTiles.Count);
-
-            int loopIt = 0;
-            foreach (Vector2Int wallTile in wallTiles)
-            {
-                if (this.bossRoomIDs.Contains(i))
-                {
-                    break;
-                }
-
-                if (loopIt == randExitPosition)
-                {
-                    var exitTileToMark = wallTile;
-                    finalizedRooms[i].exit = new Teleport();
-                    finalizedRooms[i].exit.teleportFrom = exitTileToMark;
-
-
-                    DeleteSingleTile(exitTileToMark);
-
-                    int rotationAngles = DetermineRotationOfTeleport(exitTileToMark, finalizedRooms[i].FloorTiles);
-
-                    GenerateRoomExitPrefab(exitTileToMark, rotationAngles);
-                    CreateWallTilesAroundTeleport(exitTileToMark, finalizedRooms[i].FloorTiles, finalizedRooms[i].WallTiles);
-                    break;
-                }
-                loopIt++;
-            }
-
-            int pseudoIt = 0;
-            foreach (Vector2Int nextRoomWallTile in nextRoomWallTiles)
-            {
-                if (startingRoomID == i + 1)
-                {
-                    break;
-                }
-
-                if (pseudoIt < randEntrancePosition)
-                {
-                    pseudoIt++;
-                    continue;
-                }
-
-                var entranceTileToMark = nextRoomWallTile;
-                finalizedRooms[i + 1].entrance = new Teleport();
-                finalizedRooms[i + 1].entrance.teleportFrom = entranceTileToMark;
-                finalizedRooms[i + 1].entrance.teleportToRoomId = i;
-                DeleteSingleTile(entranceTileToMark);
-
-                int rotationAngles = DetermineRotationOfTeleport(entranceTileToMark, finalizedRooms[i + 1].FloorTiles);
-                GenerateRoomEntrancePrefab(entranceTileToMark, rotationAngles);
-                CreateWallTilesAroundTeleport(entranceTileToMark, finalizedRooms[i + 1].FloorTiles, finalizedRooms[i + 1].WallTiles);
-                break;
-
-            }
-        }
-    }*/
 
     private void CreateWallTilesAroundTeleport(Vector2Int tileToMark,
         HashSet<Vector2Int> floorTiles, HashSet<Vector2Int> wallTiles)
@@ -406,32 +342,10 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
 
     }
 
-/*    private void CreateTeleportToLocations(Dictionary<int, Room> finalizedRooms)
-    {
-
-        foreach (var room in finalizedRooms)
-        {
-            foreach (int connectedRoomID in room.Value.connections)
-            {
-                room.Value.exit.teleportTo = FindProperRoomTileAroundTeleportLocation(finalizedRooms[connectedRoomID].FloorTiles,
-                    finalizedRooms[connectedRoomID].entrance.teleportFrom);
-                room.Value.exit.teleportToRoomId = connectedRoomID;
-                finalizedRooms[connectedRoomID].entrance.teleportTo = FindProperRoomTileAroundTeleportLocation(
-                    room.Value.FloorTiles, room.Value.exit.teleportFrom);
-            }
-        }
-    }*/
-
-
     private int DetermineStartingRoom(int rangeOfRooms)
     {
         return 0;
     }
-
-/*    private int DetermineBossRoom(int startingRoomID, int roomsAmount)
-    {
-        return startingRoomID > roomsAmount - startingRoomID - 1 ? 0 : roomsAmount - 1;
-    }*/
 
     private int DetermineTreasureRoom(int startingRoomID, int bossRoomID, List<int> currentTreasureRooms, int roomsAmount)
     {
@@ -459,31 +373,6 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
     {
         tilemapVisualizer.DeleteSingleTile(singleWallTile);
     }
-
-/*    private Dictionary<int, Room> GeneratePrimitiveConnections(Dictionary<int, Room> finalizedRooms)
-    {
-        Dictionary<int, Room> returnRooms = new Dictionary<int, Room>();
-        *//*Dictionary<int,int> newDict = new Dictionary<int,int>();*//*
-        for (int i = 0; i < finalizedRooms.Count; i++)
-        {
-
-            Room room = finalizedRooms[i];
-
-            List<int> conns = new List<int>
-            {
-                i + 1
-            };
-            if (this.bossRoomIDs.Contains(room.Id))
-            {
-                conns = new List<int>();
-            }
-            room.connections = conns;
-
-            returnRooms.Add(i, room);
-        }
-
-        return returnRooms;
-    }*/
 
     private void GenerateTreasureRoomsPrefabs(HashSet<Vector2Int> roomTiles, Dictionary<string, int> treasureContent)
     {
