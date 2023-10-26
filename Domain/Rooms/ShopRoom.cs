@@ -4,7 +4,7 @@ using UnityEngine;
 public class ShopRoom
 {
     private static int amountOfSpecificItems = 1;
-    private static int amountOfCollectables = 2;
+    private static int amountOfCollectables = 2; // 1 star + 1 hpPotion
     public static Dictionary<string, int> costs = new Dictionary<string, int>()
     {
         { "hpPotion", 5 },
@@ -12,34 +12,19 @@ public class ShopRoom
         { "item", 20 }
     };
     public Room room;
-    public NPC npc;
-    public List<int> itemIds;
-    public List<Collectable> collectables;
+    public string npcType;
+    public int itemId = 0;
+    public List<string> collectables = new List<string>();
 
     public ShopRoom(Room room)
     {
         this.room = room;
-        switch (NPC.npcTypes[NPC.DetermineRandomNPC()])
-        {
-            case "Trainer":
-                npc = new TrainerNPC();
-                break;
-            case "Trader":
-                //todo
-                break;
-            case "Wanderer":
-                //todo
-                break;
-            case "Astray":
-                //todo
-                break;
-            default: break;
-        }
+        npcType = NPC.npcTypes[NPC.DetermineRandomNPC()];
         RandomlyPickLootItems();
-        this.collectables = new List<Collectable>()
+        this.collectables = new List<string>()
         {
-            new HpPotion(),
-            new Star()
+            "hpPotion",
+            "star"
         };
     }
 
@@ -52,7 +37,7 @@ public class ShopRoom
         for(int i = 0; i < itemsToRoll; i++)
         {
             int chosenItem = itemIds[UnityEngine.Random.Range(0, itemIds.Count)];
-            this.itemIds.Add(chosenItem);
+            this.itemId = chosenItem;
             GameController.RemoveItemFromAvailableSpecificItemLoot(chosenItem);
             itemIds.Remove(chosenItem);
         }

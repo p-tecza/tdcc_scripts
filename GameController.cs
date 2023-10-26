@@ -80,6 +80,7 @@ public class GameController : MonoBehaviour
 
     public static void RemoveItemFromAvailableSpecificItemLoot(int itemId)
     {
+        Debug.Log(itemId);
         availableSpecificItemLoot.Remove(itemId);
     }
     public static void SetAvailableSpecificItemLoot(List<int> availableLoot)

@@ -3,9 +3,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class NPC : MonoBehaviour
+public class NPC : MonoBehaviour
 {
+
     public string npcName;
+    public string npcType;
 
     public static List<string> npcTypes = new List<string>()
     {
@@ -15,7 +17,10 @@ public abstract class NPC : MonoBehaviour
     // Trader -> possibility to buy an item with discounted price
     // Wanderer -> basic talk, nothing game-changing
     // Astray -> grants an item after returning something he lost
-    public abstract void Interact();
+    public virtual void Interact()
+    {
+
+    }
 
     public static int DetermineRandomNPC()
     {

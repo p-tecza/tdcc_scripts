@@ -6,13 +6,13 @@ using UnityEngine.UIElements;
 public class Treasure : MonoBehaviour
 {
     [SerializeField]
-    private List<GameObject> possibleTreasures;
+    public List<GameObject> possibleTreasures;
     [SerializeField]
     private Sprite openChestSprite;
     [SerializeField]
-    private GameObject healthPotion;
+    public GameObject healthPotion;
     [SerializeField]
-    private GameObject star;
+    public GameObject star;
     [SerializeField]
     private GameObject coin;
     public GameObject sprite { get; set; }

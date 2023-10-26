@@ -18,12 +18,6 @@ public class GridAlgorithm
         gg.CreateNodesGrid(rooms);
         gg.CreatePrimitiveNodesConnections();
 
-/*        Debug.Log("PRIMITIVE CONNECTIONS:");
-        foreach(GraphConnection gc in gg.connections){
-            Debug.Log(gc.ToString());
-        }
-        Debug.Log("PRIMITIVE SIZE: "+gg.connections.Count);*/
-
         List<GraphConnection> mst = PrimsAlgorithm.MinimumSpanningTree(gg.connections, 0, rooms.Count);
         mst = SetWeightsOfConnectionsToOne(mst);
 
@@ -33,17 +27,6 @@ public class GridAlgorithm
 
         gg.CreateProperNodesConnections(mst);
 
-
-
-/*        Debug.Log("MINIMAL SPANNING TREE:");
-        foreach (GraphConnection gc in mst)
-        {
-            Debug.Log(gc.ToString());
-        }
-
-
-        Debug.Log("GRAF!");
-        Debug.Log(GraphToString(rooms.Count, mst));*/
 
         Debug.Log("GRAF WITH ADDITIONAL CONNECTIONS:");
         Debug.Log(GraphToString(rooms.Count, gg.connections));
@@ -136,8 +119,6 @@ public class GridAlgorithm
                 else
                 {
                     int lot = UnityEngine.Random.Range(0, 100);
-                    /*Debug.Log("LOSOWANKO: " + lot);
-                    Debug.Log("SZANSA: " + chance);*/
                     if (lot < chance)
                     {
                         newProperConnections.Add(connection);

@@ -25,6 +25,36 @@ public static class WallGenerator
         }
     }
 
+    public static void CreateWalls(HashSet<Vector2Int> floorPositions, TilemapVisualizer tilemapVisualizer, List<Teleport> teleports)
+    {
+        List<Vector2Int> teleportsFrom = new List<Vector2Int>();
+
+        foreach (var teleport in teleports)
+        {
+            teleportsFrom.Add(teleport.teleportFrom);
+        }
+
+        var basicWallPositions = FindWallsInDirections(floorPositions, Direction2D.cardinalDirectionsList);
+        allWallTiles.UnionWith(basicWallPositions);
+        foreach (var position in basicWallPositions)
+        {
+
+            if (teleportsFrom.Contains(position))
+            {
+                continue;
+            }
+
+            if (basicWallPositions.Contains(new Vector2Int(position.x, position.y + 1)))
+            {
+                tilemapVisualizer.PaintSingleSideWall(position);
+            }
+            else
+            {
+                tilemapVisualizer.PaintSingleTopWall(position);
+            }
+        }
+    }
+
     public static void GenerateWallsInGivenLocations(HashSet<Vector2Int> wallPositions, TilemapVisualizer tilemapVisualizer)
     {
         foreach (var position in wallPositions)

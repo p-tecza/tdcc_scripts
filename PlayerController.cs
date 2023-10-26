@@ -74,7 +74,7 @@ public class PlayerController : MonoBehaviour
     public void SetUpCharacter()
     {
         this.playerObject.SetActive(true);
-        this.startingRoomID = FullDungeonGenerator.GetStartingRoomID();
+        this.startingRoomID = 0;
         this.roomInfo = FullDungeonGenerator.GetFinalizedRooms();
         this.enableTeleports = true;
         this.enableMovement = true;
