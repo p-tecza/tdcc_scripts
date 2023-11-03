@@ -163,9 +163,7 @@ public class PlayerController : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        /*if (collision.gameObject.name == "Walls")
-        {
-        }*/
+
         if (collision.gameObject.tag == "Teleport" && enableTeleports)
         {
 
@@ -183,39 +181,6 @@ public class PlayerController : MonoBehaviour
             Invoke("EnableMovement", enterRoomIdleDelay);
             Invoke("EnableEnemiesInRoom", enterRoomIdleDelay);
             //-------------
-
-/*
-            if (Mathf.Abs(collision.transform.position.x - this.currentRoom.exit.teleportFrom.x) < 1f
-                && collision.transform.position.y - this.currentRoom.exit.teleportFrom.y < 1f)
-            {
-                this.enableTeleports = false;
-                this.enableMovement = false;
-                this.playerObject.transform.position = new Vector3(this.currentRoom.exit.teleportTo.x,
-                    this.currentRoom.exit.teleportTo.y, 0);
-
-                this.currentRoom = this.roomInfo[this.currentRoom.exit.teleportToRoomId];
-
-                Invoke("EnableMovement", enterRoomIdleDelay);
-                Invoke("EnableEnemiesInRoom", enterRoomIdleDelay);
-
-            }
-
-            if (this.currentRoom.entrance != null && Mathf.Abs(collision.transform.position.x - this.currentRoom.entrance.teleportFrom.x) < 1f
-                && collision.transform.position.y - this.currentRoom.entrance.teleportFrom.y < 1f)
-            {
-
-                this.enableTeleports = false;
-                this.enableMovement = false;
-                this.playerObject.transform.position = new Vector3(this.currentRoom.entrance.teleportTo.x,
-                    this.currentRoom.entrance.teleportTo.y, 0);
-
-                this.currentRoom = this.roomInfo[this.currentRoom.entrance.teleportToRoomId];
-
-                Invoke("EnableMovement", enterRoomIdleDelay);
-                Invoke("EnableEnemiesInRoom", enterRoomIdleDelay);
-
-            }*/
-
 
         }
 
@@ -250,6 +215,64 @@ public class PlayerController : MonoBehaviour
             ResetMyVelocity();
         }
 
+        if(collision.gameObject.tag == "ShopItem")
+        {
+            TryToPickUpShopItem(collision.gameObject);
+        }
+
+    }
+
+    private void TryToPickUpShopItem(GameObject shopObject)
+    {
+        string shopObjectName = shopObject.name;
+        if(shopObjectName == "HealthPotion(Clone)")
+        {
+            if(this.moneyAmount < ShopRoom.costs["hpPotion"])
+            {
+                return;
+            }
+            SetMoneyAmountAndUpdateUI(this.moneyAmount - ShopRoom.costs["hpPotion"]);
+            PickUpCollectable(shopObject);
+            this.gameController.RemoveItemRelatedPriceText(shopObject);
+            RemovePickedUpObject(shopObject);
+            /*GameController.RemoveItemHint(shopObject);*/
+        }
+        else if(shopObjectName == "Star(Clone)")
+        {
+            if (this.moneyAmount < ShopRoom.costs["star"])
+            {
+                return;
+            }
+            SetMoneyAmountAndUpdateUI(this.moneyAmount - ShopRoom.costs["star"]);
+            PickUpCollectable(shopObject);
+            this.gameController.RemoveItemRelatedPriceText(shopObject);
+            RemovePickedUpObject(shopObject);
+            /*GameController.RemoveItemHint(shopObject);*/
+        }
+        else
+        {
+            if (this.moneyAmount < ShopRoom.costs["item"])
+            {
+                return;
+            }
+            SetMoneyAmountAndUpdateUI(this.moneyAmount - ShopRoom.costs["item"]);
+            PickUpItem(shopObject);
+            this.gameController.RemoveItemRelatedPriceText(shopObject);
+            RemovePickedUpObject(shopObject);
+            /*GameController.RemoveItemHint(shopObject);*/
+        }
+    }
+
+    private void SetMoneyAmountAndUpdateUI(int newMoneyAmount)
+    {
+        this.moneyAmount = newMoneyAmount;
+        this.gameController.UpdateUICoinsAmount(newMoneyAmount);
+    }
+
+    private void RemovePickedUpObject(GameObject pickedUpObject)
+    {
+        Destroy(pickedUpObject);
+        ResetMyVelocity();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -394,6 +417,12 @@ public class PlayerController : MonoBehaviour
             this.gameController.UpdateUICollectables(this.ownedHpPotions, this.ownedStars);
         }
     }
+
+    public void ToggleHints()
+    {
+        this.gameController.ToggleHints();
+    }
+
     private void SetSlider(float sliderValue)
     {
         this.healthSlider.value = sliderValue;

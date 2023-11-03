@@ -17,6 +17,11 @@ public class KeyboardInteraction : MonoBehaviour
             this.GetComponent<PlayerController>().UseHealthPotion();
         }
 
+        if(Input.GetKeyDown(KeyCode.LeftAlt)) 
+        {
+            this.GetComponent<PlayerController>().ToggleHints();
+        }
+
     }
 
 }

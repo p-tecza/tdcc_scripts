@@ -18,11 +18,13 @@ public class Treasure : MonoBehaviour
     public GameObject sprite { get; set; }
     public int mainItemId { get; set; }
     public Dictionary<string,int > additionalItems { get; set; }
+    public GameController gameController;
 
     [SerializeField]
     private float thrustForce = 1f;
 
     private GameObject contains;
+
 
 
     void Awake()
@@ -52,15 +54,16 @@ public class Treasure : MonoBehaviour
         {
             for(int i = 0; i < this.additionalItems["hpPots"]; i++)
             {
-                float xPartModifierThrustVector = (float) UnityEngine.Random.Range(0, 100) / 100f;
-                float yPartModifierThrustVector = (float) UnityEngine.Random.Range(0, 100) / 100f;
+                float xPartModifierThrustVector = (float) UnityEngine.Random.Range(50, 100) / 100f;
+                float yPartModifierThrustVector = (float) UnityEngine.Random.Range(50, 100) / 100f;
                 Vector2 thrustMainVector = this.transform.position - playerCurrentPosition.position;
                 Vector2 thrustVector = new Vector2(thrustMainVector.x * xPartModifierThrustVector,
                     thrustMainVector.y * yPartModifierThrustVector);
-                Vector3 fixedObjectRespawn = new Vector3(thrustMainVector.x, thrustMainVector.y, 0) / 2 + this.transform.position;
+                Vector3 fixedObjectRespawn = new Vector3(thrustMainVector.x, thrustMainVector.y, 0) + this.transform.position;
                 GameObject hpPotion = Instantiate(this.healthPotion, fixedObjectRespawn, Quaternion.identity);
                 hpPotion.GetComponent<Rigidbody2D>().AddForce(thrustVector * thrustForce, ForceMode2D.Impulse);
                 hpPotion.GetComponent<HpPotion>().ControlTheCollectableDrop();
+                this.gameController.AddNewHint(fixedObjectRespawn, hpPotion);
             }
         }
 
@@ -68,12 +71,12 @@ public class Treasure : MonoBehaviour
         {
             for (int i = 0; i < this.additionalItems["coins"]; i++)
             {
-                float xPartModifierThrustVector = (float)UnityEngine.Random.Range(0, 100) / 100f;
-                float yPartModifierThrustVector = (float)UnityEngine.Random.Range(0, 100) / 100f;
+                float xPartModifierThrustVector = (float)UnityEngine.Random.Range(50, 100) / 100f;
+                float yPartModifierThrustVector = (float)UnityEngine.Random.Range(50, 100) / 100f;
                 Vector2 thrustMainVector = this.transform.position - playerCurrentPosition.position;
                 Vector2 thrustVector = new Vector2(thrustMainVector.x*xPartModifierThrustVector,
                     thrustMainVector.y*yPartModifierThrustVector);
-                Vector3 fixedObjectRespawn = new Vector3(thrustMainVector.x, thrustMainVector.y, 0) / 2 + this.transform.position;
+                Vector3 fixedObjectRespawn = new Vector3(thrustMainVector.x, thrustMainVector.y, 0) + this.transform.position;
                 GameObject coinObject = Instantiate(this.coin, fixedObjectRespawn, Quaternion.identity);
                 coinObject.GetComponent<Rigidbody2D>().AddForce(thrustVector * thrustForce, ForceMode2D.Impulse);
                 coinObject.GetComponent<Coin>().ControlTheCoinDrop();
@@ -84,29 +87,31 @@ public class Treasure : MonoBehaviour
         {
             for (int i = 0; i < this.additionalItems["stars"]; i++)
             {
-                float xPartModifierThrustVector = (float)UnityEngine.Random.Range(0, 100) / 100f;
-                float yPartModifierThrustVector = (float)UnityEngine.Random.Range(0, 100) / 100f;
+                float xPartModifierThrustVector = (float)UnityEngine.Random.Range(50, 100) / 100f;
+                float yPartModifierThrustVector = (float)UnityEngine.Random.Range(50, 100) / 100f;
                 Vector2 thrustMainVector = this.transform.position - playerCurrentPosition.position;
                 Vector2 thrustVector = new Vector2(thrustMainVector.x * xPartModifierThrustVector,
                     thrustMainVector.y * yPartModifierThrustVector);
-                Vector3 fixedObjectRespawn = new Vector3(thrustMainVector.x, thrustMainVector.y, 0) / 2 + this.transform.position;
+                Vector3 fixedObjectRespawn = new Vector3(thrustMainVector.x, thrustMainVector.y, 0) + this.transform.position;
                 GameObject starObject = Instantiate(this.star, fixedObjectRespawn, Quaternion.identity);
                 starObject.GetComponent<Rigidbody2D>().AddForce(thrustVector * thrustForce, ForceMode2D.Impulse);
                 starObject.GetComponent<Star>().ControlTheCollectableDrop();
+                this.gameController.AddNewHint(fixedObjectRespawn, starObject);
             }
         }
 
         if(this.contains != null)
         {
-            float xPartModifierThrustVector = (float)UnityEngine.Random.Range(0, 100) / 100f;
-            float yPartModifierThrustVector = (float)UnityEngine.Random.Range(0, 100) / 100f;
+            float xPartModifierThrustVector = (float)UnityEngine.Random.Range(50, 100) / 100f;
+            float yPartModifierThrustVector = (float)UnityEngine.Random.Range(50, 100) / 100f;
             Vector2 thrustMainVector = this.transform.position - playerCurrentPosition.position;
             Vector2 thrustVector = new Vector2(thrustMainVector.x * xPartModifierThrustVector,
                 thrustMainVector.y * yPartModifierThrustVector);
-            Vector3 fixedObjectRespawn = new Vector3(thrustMainVector.x, thrustMainVector.y, 0) / 2 + this.transform.position;
+            Vector3 fixedObjectRespawn = new Vector3(thrustMainVector.x, thrustMainVector.y, 0) + this.transform.position;
             GameObject containedItemObject = Instantiate(this.contains, fixedObjectRespawn, Quaternion.identity);
             containedItemObject.GetComponent<Rigidbody2D>().AddForce(thrustVector * thrustForce, ForceMode2D.Impulse);
             containedItemObject.GetComponent<Item>().ControlTheItemDrop();
+            this.gameController.AddNewHint(fixedObjectRespawn, containedItemObject);
         }
 
 

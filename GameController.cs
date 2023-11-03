@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 
 public class GameController : MonoBehaviour
@@ -25,11 +27,18 @@ public class GameController : MonoBehaviour
     public TMP_Text ownedHpPots;
     public TMP_Text ownedStars;
 
+    public Canvas priceCanvas;
+    public Canvas hintCanvas;
+    public GameObject hintObject;
+    public float additionalHintOffset = 0.5f;
+
     [SerializeField]
     private Camera mainCamera;
     [SerializeField]
     [Range(1f, 10f)]
     private float cameraZoom = 1f;
+    [SerializeField]
+    private bool hintsVisible = false;
 
     private static List<int> availableSpecificItemLoot = new List<int>();
 
@@ -91,6 +100,50 @@ public class GameController : MonoBehaviour
     public static List<int> GetAvailableSpecificItemLoot()
     {
         return availableSpecificItemLoot;
+    }
+
+    public void RemoveItemRelatedPriceText(GameObject shopObject)
+    {
+
+        // name of shop item pricetext must be unique, add some sort of iterator for specific dung lvl
+
+        string nameOfPriceText = "PriceText" + shopObject.name;
+        GameObject canvasObject = this.priceCanvas.gameObject;
+        int childrenCount = canvasObject.transform.childCount;
+        for (int i = 0; i < childrenCount; i++)
+        {
+            GameObject childObject = canvasObject.transform.GetChild(i).gameObject;
+            Debug.Log(childObject.name + "(Clone)");
+            Debug.Log(nameOfPriceText);
+            if (childObject.name + "(Clone)" == nameOfPriceText)
+            {
+                Destroy(childObject);
+            }
+        }
+    }
+
+    public void AddNewHint(Vector3 itemPosition, GameObject gameObject)
+    {
+        Vector3 finalHintPosition = new Vector3(itemPosition.x, itemPosition.y, itemPosition.z);
+        finalHintPosition.y = itemPosition.y + gameObject.GetComponent<BoxCollider2D>().size.y / 2 + this.additionalHintOffset;
+        GameObject newCanvasObject = Instantiate(this.hintCanvas.gameObject, finalHintPosition, Quaternion.identity);
+        newCanvasObject.transform.SetParent(gameObject.transform, true);
+    }
+
+
+    public void ToggleHints()
+    {
+        this.hintsVisible = !this.hintsVisible;
+        GameObject[] hintObjects = GameObject.FindGameObjectsWithTag("Hint");
+        for (int i = 0; i < hintObjects.Length; i++) 
+        {
+            GameObject currentHintCanvas = hintObjects[i];
+            int hintCanvChildCount = currentHintCanvas.transform.childCount;
+            for (int j = 0; j < hintCanvChildCount; j++)
+            {
+                currentHintCanvas.transform.GetChild(j).gameObject.SetActive(this.hintsVisible);
+            }
+        }
     }
 
 }
