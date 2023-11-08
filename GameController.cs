@@ -15,6 +15,8 @@ public class GameController : MonoBehaviour
 
     public GameOverScreen gameOverScreen;
 
+    private AllItemsData allItemsData;
+
     [SerializeField]
     private PlayerController characterController;
 
@@ -45,6 +47,7 @@ public class GameController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        this.allItemsData = DataReader.ReadAllItemsData();
         dungeonGenerator.GenerateDungeon();
         Vector3 startPosition = dungeonGenerator.GetStartingPosition();
         playerObject.transform.position = startPosition;
@@ -127,6 +130,10 @@ public class GameController : MonoBehaviour
         Vector3 finalHintPosition = new Vector3(itemPosition.x, itemPosition.y, itemPosition.z);
         finalHintPosition.y = itemPosition.y + gameObject.GetComponent<BoxCollider2D>().size.y / 2 + this.additionalHintOffset;
         GameObject newCanvasObject = Instantiate(this.hintCanvas.gameObject, finalHintPosition, Quaternion.identity);
+        TMP_Text hintText = newCanvasObject.transform.Find("HintObject").Find("HintText").GetComponent<TMP_Text>();
+        hintText.text = ItemHelper.GetNameOfItem(gameObject.name);
+        
+
         newCanvasObject.transform.SetParent(gameObject.transform, true);
     }
 
@@ -144,6 +151,21 @@ public class GameController : MonoBehaviour
                 currentHintCanvas.transform.GetChild(j).gameObject.SetActive(this.hintsVisible);
             }
         }
+    }
+
+    public bool AreHintsVisible()
+    {
+        return this.hintsVisible;
+    }
+
+    public AllItemsData GetAllItemsData()
+    {
+        return this.allItemsData;
+    }
+
+    public void AddNewDescription(GameObject gameObject)
+    {
+
     }
 
 }

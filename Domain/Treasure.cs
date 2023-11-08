@@ -24,12 +24,12 @@ public class Treasure : MonoBehaviour
     private float thrustForce = 1f;
 
     private GameObject contains;
-
+    private AllItemsData allItemsData;
 
 
     void Awake()
     {
-        
+        this.allItemsData = gameController.GetAllItemsData();
     }
 
     internal void SetContent(Dictionary<string, int> treasureContent)
@@ -64,6 +64,7 @@ public class Treasure : MonoBehaviour
                 hpPotion.GetComponent<Rigidbody2D>().AddForce(thrustVector * thrustForce, ForceMode2D.Impulse);
                 hpPotion.GetComponent<HpPotion>().ControlTheCollectableDrop();
                 this.gameController.AddNewHint(fixedObjectRespawn, hpPotion);
+                this.gameController.AddNewDescription(hpPotion);
             }
         }
 
@@ -97,6 +98,7 @@ public class Treasure : MonoBehaviour
                 starObject.GetComponent<Rigidbody2D>().AddForce(thrustVector * thrustForce, ForceMode2D.Impulse);
                 starObject.GetComponent<Star>().ControlTheCollectableDrop();
                 this.gameController.AddNewHint(fixedObjectRespawn, starObject);
+                this.gameController.AddNewDescription(starObject);
             }
         }
 
@@ -112,6 +114,7 @@ public class Treasure : MonoBehaviour
             containedItemObject.GetComponent<Rigidbody2D>().AddForce(thrustVector * thrustForce, ForceMode2D.Impulse);
             containedItemObject.GetComponent<Item>().ControlTheItemDrop();
             this.gameController.AddNewHint(fixedObjectRespawn, containedItemObject);
+            this.gameController.AddNewDescription(containedItemObject);
         }
 
 

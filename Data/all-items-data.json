@@ -1,0 +1,34 @@
+{
+  "collectables": [
+    {
+      "name": "Star",
+      "description": "Description of Star collectable",
+      "impactType": "",
+      "impactValue": ""
+    },
+    {
+      "name": "HealthPotion",
+      "description": "Description of HealthPotion item",
+      "impactType": "healPower",
+      "impactValue": "20"
+    }
+  ],
+  "items": [
+    {
+      "name": "Torch",
+      "description": "Description of Torch item"
+    },
+    {
+      "name": "GoldenKey",
+      "description": "Description of GoldenKey item"
+    },
+    {
+      "name": "RedEmblem",
+      "description": "Description of RedEmblem item"
+    },
+    {
+      "name": "Bones",
+      "description": "Description of Bones item"
+    }
+  ]
+}
