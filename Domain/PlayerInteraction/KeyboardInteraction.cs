@@ -8,6 +8,9 @@ using UnityEngine.UI;
 public class KeyboardInteraction : MonoBehaviour
 {
 
+    [SerializeField]
+    private GameController gameController;
+
     void Update()
     {
 
@@ -20,6 +23,12 @@ public class KeyboardInteraction : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.LeftAlt)) 
         {
             this.GetComponent<PlayerController>().ToggleHints();
+        }
+
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            Debug.Log("PROBA INTERAKCJI");
+            this.gameController.SearchForInteractions();
         }
 
     }

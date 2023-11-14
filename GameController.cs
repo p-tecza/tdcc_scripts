@@ -18,7 +18,7 @@ public class GameController : MonoBehaviour
     private AllItemsData allItemsData;
 
     [SerializeField]
-    private PlayerController characterController;
+    private PlayerController playerController;
 
     public TMP_Text tmpCoinsAmount;
     public TMP_Text playerToughness;
@@ -52,8 +52,8 @@ public class GameController : MonoBehaviour
         Vector3 startPosition = dungeonGenerator.GetStartingPosition();
         playerObject.transform.position = startPosition;
         mainCamera.transform.position = startPosition;
-        characterController.SetUpCharacter();
-        characterController.enabled = true;
+        playerController.SetUpCharacter();
+        playerController.enabled = true;
         PlayerStats ps = playerObject.GetComponent<PlayerController>().GetStats();
         UpdateUIPlayerStats(ps);
     }
@@ -153,6 +153,13 @@ public class GameController : MonoBehaviour
         }
     }
 
+    public void SearchForInteractions()
+    {
+        Vector3 currentPlayerPos = this.playerObject.transform.position;
+        GameObject objectToInteractWith = this.playerController.FindNearestInteractiveEntity();
+
+    }
+
     public bool AreHintsVisible()
     {
         return this.hintsVisible;
@@ -161,11 +168,6 @@ public class GameController : MonoBehaviour
     public AllItemsData GetAllItemsData()
     {
         return this.allItemsData;
-    }
-
-    public void AddNewDescription(GameObject gameObject)
-    {
-
     }
 
 }

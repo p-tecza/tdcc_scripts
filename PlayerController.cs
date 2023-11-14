@@ -60,6 +60,8 @@ public class PlayerController : MonoBehaviour
     private Transform playerAttackPoint;
     [SerializeField]
     private LayerMask enemyLayer;
+    [SerializeField]
+    private LayerMask interactiveLayer;
 
     [SerializeField]
     protected Slider healthSlider;
@@ -70,6 +72,9 @@ public class PlayerController : MonoBehaviour
     private int ownedHpPotions;
     [SerializeField]
     private int ownedStars;
+
+    [SerializeField]
+    private float playerInteractionRange; 
 
     public void SetUpCharacter()
     {
@@ -431,11 +436,41 @@ public class PlayerController : MonoBehaviour
         else this.healthSliderFill.color = new Color(0, 0.6f, 0);
     }
 
+    public GameObject FindNearestInteractiveEntity()
+    {
+        Vector3 interactionRefPoint = transform.Find("InteractionRefPoint").position;
+        Collider2D[] allNearbyInteractiveEntities = Physics2D.OverlapCircleAll(interactionRefPoint, this.playerInteractionRange, this.interactiveLayer);
+        float minDist = float.MaxValue;
+        GameObject returnObject = null;
+        foreach (Collider2D interactive in allNearbyInteractiveEntities)
+        {
+            float distanceBetween = Vector3.Distance(interactionRefPoint, interactive.transform.position);
+            if(distanceBetween < minDist)
+            {
+                minDist = distanceBetween;
+                returnObject = interactive.gameObject;
+            }
+
+
+            enemy.GetComponent<Enemy>().TakeDamage(this.stats.attackDamage);
+        }
+
+    }
+
+
+
     private void OnDrawGizmosSelected()
     {
         if (playerAttackPoint == null)
             return;
         Gizmos.DrawWireSphere(playerAttackPoint.position, this.playerAttackRange);
+
+        Transform playerInteractionPoint = transform.Find("InteractionRefPoint");
+
+        if (playerInteractionPoint == null)
+            return;
+
+        Gizmos.DrawWireSphere(playerInteractionPoint.position, this.playerInteractionRange);
     }
 
 }

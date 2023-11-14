@@ -4,13 +4,13 @@
       "name": "Star",
       "description": "Description of Star collectable",
       "impactType": "",
-      "impactValue": ""
+      "impactValue": 0
     },
     {
-      "name": "HealthPotion",
-      "description": "Description of HealthPotion item",
+      "name": "Hp Potion",
+      "description": "Description of Hp Potion collectable",
       "impactType": "healPower",
-      "impactValue": "20"
+      "impactValue": 20
     }
   ],
   "items": [
