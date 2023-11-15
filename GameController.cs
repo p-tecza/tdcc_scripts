@@ -153,10 +153,15 @@ public class GameController : MonoBehaviour
         }
     }
 
-    public void SearchForInteractions()
+    public void TryToInteractWithNearestEntity()
     {
-        Vector3 currentPlayerPos = this.playerObject.transform.position;
         GameObject objectToInteractWith = this.playerController.FindNearestInteractiveEntity();
+        if (objectToInteractWith == null) return;
+
+        gameObject.GetComponent<NPCInteractionController>().EnableInteractionWindow();
+
+        Debug.Log("NEAREST interactive ENTITY: " + objectToInteractWith.name);
+
 
     }
 

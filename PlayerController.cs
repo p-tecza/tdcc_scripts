@@ -441,20 +441,17 @@ public class PlayerController : MonoBehaviour
         Vector3 interactionRefPoint = transform.Find("InteractionRefPoint").position;
         Collider2D[] allNearbyInteractiveEntities = Physics2D.OverlapCircleAll(interactionRefPoint, this.playerInteractionRange, this.interactiveLayer);
         float minDist = float.MaxValue;
-        GameObject returnObject = null;
+        GameObject nearestInteractiveEntity = null;
         foreach (Collider2D interactive in allNearbyInteractiveEntities)
         {
             float distanceBetween = Vector3.Distance(interactionRefPoint, interactive.transform.position);
             if(distanceBetween < minDist)
             {
                 minDist = distanceBetween;
-                returnObject = interactive.gameObject;
+                nearestInteractiveEntity = interactive.gameObject;
             }
-
-
-            enemy.GetComponent<Enemy>().TakeDamage(this.stats.attackDamage);
         }
-
+        return nearestInteractiveEntity;
     }
 
 
