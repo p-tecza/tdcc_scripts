@@ -1,0 +1,55 @@
+{
+    "allNPCData": [
+        {
+            "npcType": "Trainer",
+            "consecutiveDialogs": [
+                "Tough times, right? How about some training?",
+                "What would you like to train?"
+            ],
+            "consecutiveOptions": [
+                "1>Training",
+                "1>Quit",
+                "2>Tgh +1.00",
+                "2>Atd +1.00",
+                "2>Atr +0.10",
+                "2>Ats +0.10",
+                "2>Mvs +0.05"
+            ]
+        },
+        {
+            "npcType": "Trader",
+            "consecutiveDialogs": [
+                "This place is kinda scary... Great business nonetheless!",
+                "Would you like to buy somtehing?"
+            ],
+            "consecutiveOptions": [
+                "1>Shop",
+                "1>Quit",
+                "2>PlaceholderItem1",
+                "2>PlaceholderItem2"
+            ]
+        },
+        {
+            "npcType": "Wanderer",
+            "consecutiveDialogs": [
+                "Just lookin' around."
+            ],
+            "consecutiveOptions": [
+                "1>Quit"
+            ]
+        },
+        {
+            "npcType": "Astray",
+            "consecutiveDialogs": [
+                "H-h-help me...",
+                "Please, f-f-f-find my lost n-ne-necklace..."
+            ],
+            "consecutiveOptions": [
+                "1>Quest",
+                "1>Quit",
+                "2>Accept",
+                "2>Decline"
+            ]
+        }
+    ]
+}

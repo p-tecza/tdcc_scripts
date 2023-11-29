@@ -14,6 +14,8 @@ public abstract class Enemy : MonoBehaviour
     [SerializeField]
     [Range(0f, 10f)]
     protected float destroyBodyAfterSeconds;
+    [SerializeField]
+    protected GameController gameController;
     protected int currentHealth;
     public float movementSpeed;
     public float attackSpeed;
@@ -34,4 +36,10 @@ public abstract class Enemy : MonoBehaviour
         else if (sliderValue < 0.6) this.healthSliderFill.color = UnityEngine.Color.yellow;
         else this.healthSliderFill.color = new Color(0, 0.6f, 0);
     }
+
+    protected void UpdateQuestProgress()
+    {
+        this.gameController.UpdateQuestProgress();
+    }
+
 }

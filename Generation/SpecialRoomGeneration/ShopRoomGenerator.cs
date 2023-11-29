@@ -42,7 +42,9 @@ public class ShopRoomGenerator : MonoBehaviour
         GameObject npcObject = PickProperObject(shopRoom.npcType);
         if(npcObject != null) 
         {
-            Instantiate(npcObject, npcSpot, Quaternion.identity);
+            AllInteractiveDialogData allNPCDialogData = DataReader.ReadAllNPCDialogData();
+            GameObject refNPCObject = Instantiate(npcObject, npcSpot, Quaternion.identity);
+            refNPCObject.GetComponent<NPC>().SetNPCData(allNPCDialogData);
         }
 
         Vector3 itemSpot = new Vector3(roomCenter.x + 0.5f, roomCenter.y + -1.5f, 0);

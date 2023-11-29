@@ -1,7 +1,5 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -73,13 +71,19 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private int ownedStars;
 
+    private List<Item> ownedItems;
+
     [SerializeField]
-    private float playerInteractionRange; 
+    public float playerInteractionRange;
+
+    private bool isQuestActive;
 
     public void SetUpCharacter()
     {
         this.playerObject.SetActive(true);
+        this.ownedItems = new List<Item>();
         this.startingRoomID = 0;
+        this.isQuestActive = false;
         this.roomInfo = FullDungeonGenerator.GetFinalizedRooms();
         this.enableTeleports = true;
         this.enableMovement = true;
@@ -307,8 +311,10 @@ public class PlayerController : MonoBehaviour
     private void PickUpItem(GameObject itemObject)
     {
         Item item = itemObject.GetComponent<Item>();
+        this.ownedItems.Add(item);
         ApplyItemStats(item);
         this.gameController.UpdateUIPlayerStats(GetStats());
+        this.gameController.UpdateQuestProgress();
     }
 
     private void ApplyItemStats(Item item)
@@ -454,7 +460,49 @@ public class PlayerController : MonoBehaviour
         return nearestInteractiveEntity;
     }
 
+    public void UpgradeStat(StatType statType, float statUpgradeValue, TrainerNPC trainerNPC)
+    {
+        int cost = trainerNPC.trainingCost;
+        if(cost > this.moneyAmount)
+        {
+            return;
+        }
 
+        switch (statType)
+        {
+            case StatType.Toughness:
+                this.stats.toughness += (int)statUpgradeValue;
+                break;
+            case StatType.AttackDamage:
+                this.stats.attackDamage += (int)statUpgradeValue;
+                break;
+            case StatType.AttackRange:
+                this.stats.attackRange += statUpgradeValue;
+                break;
+            case StatType.AttackSpeed:
+                this.stats.attackSpeed += statUpgradeValue;
+                break;
+            case StatType.MovementSpeed:
+                this.stats.movementSpeed += statUpgradeValue;
+                break;
+        }
+        trainerNPC.trainingCost *= trainerNPC.costRaiseMultiplier;
+        this.moneyAmount -= cost;
+        this.gameController.UpdateUIPlayerStats(GetStats());
+        this.gameController.UpdateUICoinsAmount(this.moneyAmount);
+    }
+
+    public void StartQuest(QuestData questData)
+    {
+        this.isQuestActive = true;
+        this.gameController.PickUpQuest();
+        this.gameController.SetQuestData(questData);
+    }
+
+    public List<Item> GetOwnedItems()
+    {
+        return this.ownedItems;
+    }
 
     private void OnDrawGizmosSelected()
     {

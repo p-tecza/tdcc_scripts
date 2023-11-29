@@ -5,6 +5,7 @@ using UnityEngine.UIElements;
 
 public abstract class Item : MonoBehaviour
 {
+    public string itemName;
     public int healthPoints;
     public int toughness;
     public int attackDamage;

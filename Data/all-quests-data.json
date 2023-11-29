@@ -1,0 +1,26 @@
+{
+    "allQuestsData": [
+        {
+            "questId": 0,
+            "questName": "Purge this floor",
+            "questDialog": "C-can you s-s-slay s-some of the e-evil fo-es?",
+            "questDescription": "Slay half of the enemies in this dungeon floor.",
+            "questNotCompletedYetDialog": "P-please, do s-s-so-something with t-them!",
+            "questCompletedDialog": "T-thank you f-f-fo-for t-this!",
+            "questGoal": "Purge",
+            "questReward": "Money",
+            "givenBy": "Astray"
+        },
+        {
+            "questId": 1,
+            "questName": "Retrieve necklace",
+            "questDialog": "Please, f-f-f-find my lost n-ne-necklace...",
+            "questDescription": "Kill enemies and recover the necklace.",
+            "questNotCompletedYetDialog": "Pdsadas!",
+            "questCompletedDialog": "T-thank dasdas!",
+            "questGoal": "Retrieve item",
+            "questReward": "Money",
+            "givenBy": "Astray"
+        }
+    ]
+}

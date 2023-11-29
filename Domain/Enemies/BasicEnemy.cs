@@ -224,21 +224,28 @@ public class BasicEnemy : Enemy
         this.animator.SetTrigger("gotHurt");
         if (this.currentHealth <= 0)
         {
-            this.currentHealth = 0;
-            ResetAllStatesToFalse();
-            this.animator.SetBool("isAttacking", isAttacking);
-            this.animator.SetBool("isRunning", isRunning);
-            this.isActive = false;
-            this.GetComponent<Collider2D>().enabled = false;
-            /*  this.GetComponent<Canvas>().enabled = false;*/
-            this.animator.SetTrigger("gotKilled");
-            Destroy(gameObject, this.destroyBodyAfterSeconds);
+            Die();
         }
         else if ((float)this.currentHealth / this.healthPoints < 0.3) this.healthSliderFill.color = Color.red;
         else if ((float)this.currentHealth / this.healthPoints < 0.6) this.healthSliderFill.color = Color.yellow;
 
         this.healthSlider.value = (float)this.currentHealth / this.healthPoints;
 
+    }
+
+    private void Die()
+    {
+        this.currentHealth = 0;
+        ResetAllStatesToFalse();
+        this.animator.SetBool("isAttacking", isAttacking);
+        this.animator.SetBool("isRunning", isRunning);
+        this.isActive = false;
+        this.GetComponent<Collider2D>().enabled = false;
+        /*  this.GetComponent<Canvas>().enabled = false;*/
+        this.animator.SetTrigger("gotKilled");
+        this.gameController.enemiesTracker.EnemyDies();
+        this.gameController.UpdateQuestProgress();
+        Destroy(gameObject, this.destroyBodyAfterSeconds);
     }
 
     public override void TryDealDamage()

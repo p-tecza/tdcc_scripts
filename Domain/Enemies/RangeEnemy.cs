@@ -217,20 +217,26 @@ public class RangeEnemy : Enemy
 
         if (this.currentHealth <= 0)
         {
-            this.currentHealth = 0;
-            ResetAllStatesToFalse();
-
-            this.isActive = false;
-            this.GetComponent<Collider2D>().enabled = false;
-            /*  this.GetComponent<Canvas>().enabled = false;*/
-
-            Destroy(gameObject, this.destroyBodyAfterSeconds);
+            Die();
         }
         else if ((float)this.currentHealth / this.healthPoints < 0.3) this.healthSliderFill.color = Color.red;
         else if ((float)this.currentHealth / this.healthPoints < 0.6) this.healthSliderFill.color = Color.yellow;
 
         this.healthSlider.value = (float)this.currentHealth / this.healthPoints;
 
+    }
+
+    private void Die()
+    {
+        this.currentHealth = 0;
+        ResetAllStatesToFalse();
+
+        this.isActive = false;
+        this.GetComponent<Collider2D>().enabled = false;
+        /*  this.GetComponent<Canvas>().enabled = false;*/
+        this.gameController.enemiesTracker.EnemyDies();
+        this.gameController.UpdateQuestProgress();
+        Destroy(gameObject, this.destroyBodyAfterSeconds);
     }
 
     public override void TryDealDamage()

@@ -24,13 +24,6 @@ public class Treasure : MonoBehaviour
     private float thrustForce = 1f;
 
     private GameObject contains;
-    private AllItemsData allItemsData;
-
-
-    void Awake()
-    {
-        this.allItemsData = gameController.GetAllItemsData();
-    }
 
     internal void SetContent(Dictionary<string, int> treasureContent)
     {

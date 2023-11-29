@@ -1,12 +1,14 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using UnityEditor;
 using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
+    //repositories
+    public ItemRepository itemRepository;
+    public QuestRepository questRepository;
+    public NpcRepository npcRepository;
 
     [SerializeField]
     private GameObject playerObject;
@@ -15,10 +17,13 @@ public class GameController : MonoBehaviour
 
     public GameOverScreen gameOverScreen;
 
-    private AllItemsData allItemsData;
+    /*private AllItemsData allItemsData;*/
 
     [SerializeField]
     private PlayerController playerController;
+
+    [SerializeField]
+    private QuestController questController;
 
     public TMP_Text tmpCoinsAmount;
     public TMP_Text playerToughness;
@@ -43,19 +48,31 @@ public class GameController : MonoBehaviour
     private bool hintsVisible = false;
 
     private static List<int> availableSpecificItemLoot = new List<int>();
+    private int currentLvl = 0;
+
+    public EnemiesTracker enemiesTracker;
 
     // Start is called before the first frame update
     void Start()
     {
-        this.allItemsData = DataReader.ReadAllItemsData();
+
+        if(currentLvl == 0)
+        {
+            this.InitializeRepositories();
+        }
+
+        /*this.allItemsData = DataReader.ReadAllItemsData();*/
         dungeonGenerator.GenerateDungeon();
         Vector3 startPosition = dungeonGenerator.GetStartingPosition();
         playerObject.transform.position = startPosition;
         mainCamera.transform.position = startPosition;
         playerController.SetUpCharacter();
         playerController.enabled = true;
+        this.enemiesTracker = new EnemiesTracker();
+        InitEnemiesTracker();
         PlayerStats ps = playerObject.GetComponent<PlayerController>().GetStats();
         UpdateUIPlayerStats(ps);
+        currentLvl++;
     }
 
     // Update is called once per frame
@@ -153,12 +170,23 @@ public class GameController : MonoBehaviour
         }
     }
 
+    public void PickUpQuest()
+    {
+        this.questController.PickUpQuest();
+    }
+
+    public void SetQuestData(QuestData questData)
+    {
+        this.questController.SetQuestData(questData);
+    }
+
     public void TryToInteractWithNearestEntity()
     {
         GameObject objectToInteractWith = this.playerController.FindNearestInteractiveEntity();
         if (objectToInteractWith == null) return;
+        InteractiveDialogData data = objectToInteractWith.GetComponent<NPC>().GetNPCData();
 
-        gameObject.GetComponent<NPCInteractionController>().EnableInteractionWindow();
+        gameObject.GetComponent<NPCInteractionController>().EnableInteractionWindow(data, objectToInteractWith);
 
         Debug.Log("NEAREST interactive ENTITY: " + objectToInteractWith.name);
 
@@ -172,7 +200,54 @@ public class GameController : MonoBehaviour
 
     public AllItemsData GetAllItemsData()
     {
-        return this.allItemsData;
+        return new AllItemsData(this.itemRepository.GetAllCollectables(),this.itemRepository.GetAllItems());
     }
+
+    private void InitializeRepositories()
+    {
+        this.questRepository = new QuestRepository(DataReader.ReadAllQuestsData().allQuestsData);
+        this.npcRepository = new NpcRepository(DataReader.ReadAllNPCDialogData().allNPCData);
+        AllItemsData allItemsData = DataReader.ReadAllItemsData();
+        this.itemRepository = new ItemRepository(allItemsData.items, allItemsData.collectables);
+    }
+
+    private void InitEnemiesTracker()
+    {
+        int enemyCounter = 0;
+        foreach (Room r in FullDungeonGenerator.GetFinalizedRooms().Values)
+        {
+            enemyCounter += r.enemies.Count;
+        }
+        this.enemiesTracker.SetStartEnemiesAmount(enemyCounter);
+        this.enemiesTracker.SetAliveEnemiesAmount(enemyCounter);
+        this.enemiesTracker.SetDeadEnemiesAmount(0);
+    }
+
+    public int GetAmountOfAllEnemiesInDungeonFloor()
+    {
+        return this.enemiesTracker.GetStartEnemiesAmount();
+    }
+
+    public int GetAmountOfDeadEnemiesInDungeonFloor()
+    {
+        return this.enemiesTracker.GetDeadEnemiesAmount();
+    }
+
+    public List<Item> GetListOfPlayerOwnedItems()
+    {
+        return this.playerController.GetOwnedItems();
+    }
+
+    public void UpdateQuestProgress()
+    {
+        this.questController.UpdateQuestProgress();
+    }
+
+/*    public AllInteractiveDialogData GetAllNPCDialogData()
+    {
+        Debug.Log("GETTING NPC DATA");
+
+        return this.allNPCDialogData;
+    }*/
 
 }
