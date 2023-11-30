@@ -30,5 +30,11 @@
       "name": "Bones",
       "description": "Description of Bones item"
     }
+  ],
+  "questItems": [
+    {
+      "name": "Necklace",
+      "description": "Necklace made of unrecognizable bones."
+    }
   ]
 }

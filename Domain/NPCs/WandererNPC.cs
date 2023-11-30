@@ -7,6 +7,10 @@ public class WandererNPC : NPC
 
     public override void Start()
     {
+        if (!gameObject.name.Contains("(Clone)"))
+        {
+            return;
+        }
         base.Start();
         List<QuestData> list = new List<QuestData>();
         list.AddRange(this.gameController.questRepository.GetQuestsByNpc("Wanderer"));

@@ -53,6 +53,18 @@ public class HintsController : MonoBehaviour
 
     }
 
+    public void SetQuestItemDescriptionContent(QuestItemData itemData, Sprite sprite)
+    {
+        Transform descContentTransform = this.descriptionCanvas.transform.Find("DescriptionContent");
+        TMP_Text descItemName = descContentTransform.Find("DescriptionItemName").gameObject.GetComponent<TMP_Text>();
+        TMP_Text descText = descContentTransform.Find("DescriptionText").gameObject.GetComponent<TMP_Text>();
+        Image spriteRenderer = descContentTransform.Find("DescriptionItemIcon").gameObject.GetComponent<Image>();
+        spriteRenderer.sprite = sprite;
+
+        descItemName.text = itemData.name;
+        descText.text = itemData.description;
+    }
+
     public void ToggleItemDescription()
     {
         descriptionCanvas.SetActive(true);

@@ -16,6 +16,9 @@ public abstract class Enemy : MonoBehaviour
     protected float destroyBodyAfterSeconds;
     [SerializeField]
     protected GameController gameController;
+
+    [SerializeField]
+    protected GameObject heldItem;
     protected int currentHealth;
     public float movementSpeed;
     public float attackSpeed;
@@ -28,6 +31,10 @@ public abstract class Enemy : MonoBehaviour
     public abstract void TakeDamage(int damageTaken);
 
     public abstract void TryDealDamage();
+    public void SetHeldItem(GameObject item)
+    {
+        this.heldItem = item;
+    }
 
     public void SetSlider(float sliderValue)
     {
@@ -42,4 +49,15 @@ public abstract class Enemy : MonoBehaviour
         this.gameController.UpdateQuestProgress();
     }
 
+    protected void DropHeldItem()
+    {
+        Debug.Log("DROPPING ITEM: "+this.heldItem.name);
+        if(this.heldItem != null)
+        {
+            Debug.Log("DROPPING ITEM: " + this.heldItem.name);
+            GameObject obj = Instantiate(this.heldItem, gameObject.transform.parent);
+            Debug.Log("INSTANTIATED OBJECT NAME: " + obj.name);
+            obj.transform.position = this.gameObject.transform.position;
+        }
+    }
 }

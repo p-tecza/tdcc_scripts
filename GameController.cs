@@ -51,6 +51,8 @@ public class GameController : MonoBehaviour
     private int currentLvl = 0;
 
     public EnemiesTracker enemiesTracker;
+    [SerializeField]
+    private GameObject parentQuestItemsObject;
 
     // Start is called before the first frame update
     void Start()
@@ -200,7 +202,7 @@ public class GameController : MonoBehaviour
 
     public AllItemsData GetAllItemsData()
     {
-        return new AllItemsData(this.itemRepository.GetAllCollectables(),this.itemRepository.GetAllItems());
+        return new AllItemsData(this.itemRepository.GetAllCollectables(),this.itemRepository.GetAllItems(), this.itemRepository.GetAllQuestItems());
     }
 
     private void InitializeRepositories()
@@ -208,7 +210,7 @@ public class GameController : MonoBehaviour
         this.questRepository = new QuestRepository(DataReader.ReadAllQuestsData().allQuestsData);
         this.npcRepository = new NpcRepository(DataReader.ReadAllNPCDialogData().allNPCData);
         AllItemsData allItemsData = DataReader.ReadAllItemsData();
-        this.itemRepository = new ItemRepository(allItemsData.items, allItemsData.collectables);
+        this.itemRepository = new ItemRepository(allItemsData.items, allItemsData.collectables, allItemsData.questItems);
     }
 
     private void InitEnemiesTracker()
@@ -233,14 +235,41 @@ public class GameController : MonoBehaviour
         return this.enemiesTracker.GetDeadEnemiesAmount();
     }
 
-    public List<Item> GetListOfPlayerOwnedItems()
+    public List<QuestItem> GetListOfPlayerOwnedQuestItems()
     {
-        return this.playerController.GetOwnedItems();
+        return this.playerController.GetOwnedQuestItems();
     }
 
     public void UpdateQuestProgress()
     {
+        Debug.Log("UPDATING QUEST PROGRESS!");
         this.questController.UpdateQuestProgress();
+    }
+
+    public void InsertItemToRandomEnemyInRandomRoom(string itemName)
+    {
+        QuestItemData questItemData = this.itemRepository.GetQuestItemByName(itemName);
+        GameObject questItemObject = this.parentQuestItemsObject.transform.Find(questItemData.name).gameObject;
+        Debug.Log("QUEST ITEM OBJECT: " + questItemObject.name);
+        Dictionary<int,Room> rooms = FullDungeonGenerator.GetFinalizedRooms();
+        int pickedRoom = UnityEngine.Random.Range(0, rooms.Count);
+
+        if (rooms[pickedRoom].enemies.Count > 0)
+        {
+            rooms[pickedRoom].enemies[0].GetComponent<Enemy>().SetHeldItem(questItemObject);
+        }
+        else
+        {
+            foreach(Room room in rooms.Values)
+            {
+                if(room.enemies.Count > 0)
+                {
+                    room.enemies[0].GetComponent<Enemy>().SetHeldItem(questItemObject);
+                    break;
+                }
+            }
+        }
+
     }
 
 /*    public AllInteractiveDialogData GetAllNPCDialogData()

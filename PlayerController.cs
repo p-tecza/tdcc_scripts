@@ -72,16 +72,20 @@ public class PlayerController : MonoBehaviour
     private int ownedStars;
 
     private List<Item> ownedItems;
+    private List<QuestItem> ownedQuestItems;
 
     [SerializeField]
     public float playerInteractionRange;
 
     private bool isQuestActive;
+    private int questItemsLayer;
 
     public void SetUpCharacter()
     {
         this.playerObject.SetActive(true);
         this.ownedItems = new List<Item>();
+        this.ownedQuestItems = new List<QuestItem>();
+        this.questItemsLayer = LayerMask.NameToLayer("QuestItems");
         this.startingRoomID = 0;
         this.isQuestActive = false;
         this.roomInfo = FullDungeonGenerator.GetFinalizedRooms();
@@ -292,6 +296,12 @@ public class PlayerController : MonoBehaviour
             PickUpCoin();
         }
 
+        if(collision.gameObject.layer == questItemsLayer)
+        {
+            PickUpQuestItem(collision.gameObject);
+            Destroy(collision.gameObject);
+        }
+
     }
 
     private void PickUpCollectable(GameObject collectableObject)
@@ -314,6 +324,12 @@ public class PlayerController : MonoBehaviour
         this.ownedItems.Add(item);
         ApplyItemStats(item);
         this.gameController.UpdateUIPlayerStats(GetStats());
+    }
+    private void PickUpQuestItem(GameObject itemObject)
+    {
+        Debug.Log("PICK UP QUEST ITEM PROCED");
+        QuestItem item = itemObject.GetComponent<QuestItem>();
+        this.ownedQuestItems.Add(item);
         this.gameController.UpdateQuestProgress();
     }
 
@@ -499,9 +515,9 @@ public class PlayerController : MonoBehaviour
         this.gameController.SetQuestData(questData);
     }
 
-    public List<Item> GetOwnedItems()
+    public List<QuestItem> GetOwnedQuestItems()
     {
-        return this.ownedItems;
+        return this.ownedQuestItems;
     }
 
     private void OnDrawGizmosSelected()

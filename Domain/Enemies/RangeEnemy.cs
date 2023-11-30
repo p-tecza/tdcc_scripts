@@ -236,9 +236,14 @@ public class RangeEnemy : Enemy
         /*  this.GetComponent<Canvas>().enabled = false;*/
         this.gameController.enemiesTracker.EnemyDies();
         this.gameController.UpdateQuestProgress();
+        DropItem();
+        /*DropItem();*/
         Destroy(gameObject, this.destroyBodyAfterSeconds);
     }
-
+    private void DropItem()
+    {
+        base.DropHeldItem();
+    }
     public override void TryDealDamage()
     {
         throw new System.NotImplementedException();

@@ -10,16 +10,31 @@ public class HintsDataProvider : MonoBehaviour
     [SerializeField]
     private HintsController hintsController;
 
+    [SerializeField]
+    private GameObject childCanvasOfAssociatedGameObject;
+
     public void ProvideHintData()
     {
         string itemName = gameObject.GetComponent<TMP_Text>().text;
         AllItemsData itemsData = this.gameController.GetAllItemsData();
         Sprite sprite = gameObject.transform.parent.parent.parent.GetComponent<SpriteRenderer>().sprite;
 
-        if(itemName.Equals("Hp Potion") || itemName.Equals("Star"))
+        int questItemsLayer = LayerMask.NameToLayer("QuestItems");
+        int objectLayer = childCanvasOfAssociatedGameObject.transform.parent.gameObject.layer;
+
+        Debug.Log("QI LAYER: " + questItemsLayer);
+        Debug.Log("GO LAYER: " + objectLayer);
+
+        if (itemName.Equals("Hp Potion") || itemName.Equals("Star"))
         {
             CollectableData collectableData = FindCollectableData(itemName, itemsData.collectables);
             this.hintsController.SetCollectableDescriptionContent(collectableData, sprite);
+        }
+        else if (objectLayer == questItemsLayer)
+        {
+            QuestItemData questItemData = this.gameController.itemRepository.GetQuestItemByName(itemName);
+            Debug.Log("QID: " + questItemData.description);
+            this.hintsController.SetQuestItemDescriptionContent(questItemData, sprite);
         }
         else
         {

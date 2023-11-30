@@ -245,7 +245,14 @@ public class BasicEnemy : Enemy
         this.animator.SetTrigger("gotKilled");
         this.gameController.enemiesTracker.EnemyDies();
         this.gameController.UpdateQuestProgress();
+        /*Invoke("DropItem", this.destroyBodyAfterSeconds / 4);*/
+        DropItem();
         Destroy(gameObject, this.destroyBodyAfterSeconds);
+    }
+
+    private void DropItem()
+    {
+        base.DropHeldItem();
     }
 
     public override void TryDealDamage()

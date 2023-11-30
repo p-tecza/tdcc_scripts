@@ -7,14 +7,32 @@ public class AstrayNPC : NPC
 
     public override void Start()
     {
+        if (!gameObject.name.Contains("(Clone)"))
+        {
+            return;
+        }
+
+
         base.Start();
         List<QuestData> list = new List<QuestData>();
         list.AddRange(this.gameController.questRepository.GetQuestsByNpc("Astray"));
         if(list.Count > 0)
         {
             questData = list[UnityEngine.Random.Range(0, list.Count)];
-            // usun to na dole questData = list[1];
-            questData = list[0];
+            questData = list[1];
+            if(questData.questGoal == "Retrieve item")
+            {
+                
+                string[] itemPhrase = questData.questName.Split(" ");
+                string itemName = questData.questName;
+                if (itemPhrase.Length > 1) 
+                {
+                    itemName = itemPhrase[1];
+                    string tmp = itemName[0].ToString().ToUpper(); 
+                    itemName = tmp + itemName.Substring(1,itemName.Length-1);
+                }
+                this.gameController.InsertItemToRandomEnemyInRandomRoom(itemName);
+            }
         }
     }
 
