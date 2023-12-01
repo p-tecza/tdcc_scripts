@@ -41,6 +41,15 @@ public class NPCInteractionController : MonoBehaviour
 
     public void EnableInteractionWindow(InteractiveDialogData dialogData, GameObject procBy)
     {
+
+        if(this.questController.GetQuestState() == QuestState.SOLVED)
+        {
+            QuestData currentQuestData = this.questController.GetCurrentQuestData();
+            this.SetQuestContentForInteractionWindowDescription(currentQuestData);
+            this.interactionWindowObject.SetActive(true);
+            return;
+        }
+
         this.procBy = procBy;
         this.interactiveDialogDataTemp = dialogData;
         if (this.interactionWindowObject.activeSelf)
@@ -149,20 +158,32 @@ public class NPCInteractionController : MonoBehaviour
         QuestState currentQuestState = this.questController.GetQuestState();
         Debug.Log("STATE: " + currentQuestState);
 
+        TMP_Text dialog = interactionWindowObject.transform.Find("InteractionContent").Find("InteractionText").GetComponent<TMP_Text>();
         if (currentQuestState == QuestState.NOT_STARTED)
         {
-            TMP_Text dialog = interactionWindowObject.transform.Find("InteractionContent").Find("InteractionText").GetComponent<TMP_Text>();
             dialog.text = questData.questDialog;
             dialog.text += "\nQuest: " + questData.questDescription;
         }
-        else if(currentQuestState == QuestState.STARTED || currentQuestState == QuestState.FINISHED)
+        else if(currentQuestState == QuestState.STARTED || currentQuestState == QuestState.FINISHED || currentQuestState == QuestState.SOLVED)
         {
-            TMP_Text dialog = interactionWindowObject.transform.Find("InteractionContent").Find("InteractionText").GetComponent<TMP_Text>();
+            /*TMP_Text dialog = interactionWindowObject.transform.Find("InteractionContent").Find("InteractionText").GetComponent<TMP_Text>();*/
             string questPhrase, option;
             (questPhrase, option) = this.questController.GetStateDataOfQuestForInteractionWindow();
             dialog.text = questPhrase;
             SetQuestOption(option);
+            if(QuestState.SOLVED == currentQuestState)
+            {
+                this.interactionProgressCnt = 1;
+            }
         }
+/*        else if(currentQuestState == QuestState.SOLVED)
+        {
+            *//*TMP_Text dialog = interactionWindowObject.transform.Find("InteractionContent").Find("InteractionText").GetComponent<TMP_Text>();*//*
+            string questPhrase, option;
+            (questPhrase, option) = this.questController.GetStateDataOfQuestForInteractionWindow();
+            dialog.text = questPhrase;
+            SetQuestOption(option);
+        }*/
     }
 
     private void SetQuestOption(string option)
@@ -238,7 +259,7 @@ public class NPCInteractionController : MonoBehaviour
 
     public void DetermineOnClickAction(string npcType, int optionNumber)
     {
-        if(this.interactionProgressCnt == 0)
+        if(this.interactionProgressCnt == 0 && npcType != "Wanderer")
         {
             if(optionNumber == 1 && this.interactiveDialogDataTemp != null)
             {
@@ -248,7 +269,8 @@ public class NPCInteractionController : MonoBehaviour
             {
                 this.DisableInteractionWindow();
             }
-        }else if(this.interactionProgressCnt >= 1)
+        }
+        else if(this.interactionProgressCnt >= 1 || npcType == "Wanderer")
         {
             PlayerController playerController = this.playerObject.GetComponent<PlayerController>();
 
@@ -289,7 +311,13 @@ public class NPCInteractionController : MonoBehaviour
             }
             else if (npcType == "Wanderer")
             {
-
+                switch (optionNumber)
+                {
+                    case 1:
+                        this.DisableInteractionWindow();
+                        break;
+                    default : break;
+                }
             }
             else if (npcType == "Astray")
             {
@@ -312,6 +340,10 @@ public class NPCInteractionController : MonoBehaviour
                             this.questController.FinishQuest();
                             this.DisableInteractionWindow();
                         }
+                        else if(currentQuestState == QuestState.SOLVED)
+                        {
+                            this.DisableInteractionWindow();
+                        }
                         break;
                     case 2:
                         if(currentQuestState == QuestState.NOT_STARTED)
@@ -323,8 +355,6 @@ public class NPCInteractionController : MonoBehaviour
                         break;
                 }
             }
-
-
         }
 
 

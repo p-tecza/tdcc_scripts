@@ -51,7 +51,6 @@ public abstract class Enemy : MonoBehaviour
 
     protected void DropHeldItem()
     {
-        Debug.Log("DROPPING ITEM: "+this.heldItem.name);
         if(this.heldItem != null)
         {
             Debug.Log("DROPPING ITEM: " + this.heldItem.name);

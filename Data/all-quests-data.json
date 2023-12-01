@@ -7,8 +7,10 @@
             "questDescription": "Slay half of the enemies in this dungeon floor.",
             "questNotCompletedYetDialog": "P-please, do s-s-so-something with t-them!",
             "questCompletedDialog": "T-thank you f-f-fo-for t-this!",
+            "questSolvedDialog": "S-s-so lo-lonely...",
             "questGoal": "Purge",
             "questReward": "Money",
+            "questRewardAmount": 10,
             "givenBy": "Astray"
         },
         {
@@ -16,10 +18,12 @@
             "questName": "Retrieve necklace",
             "questDialog": "Please, f-f-f-find my lost n-ne-necklace...",
             "questDescription": "Kill enemies and recover the necklace.",
-            "questNotCompletedYetDialog": "Pdsadas!",
-            "questCompletedDialog": "T-thank dasdas!",
+            "questNotCompletedYetDialog": "D-did y-you f-f-find it?",
+            "questCompletedDialog": "I am r-re-really g-grateful for this!",
+            "questSolvedDialog":"M-my p-p-pre-precious...",
             "questGoal": "Retrieve item",
             "questReward": "Money",
+            "questRewardAmount": 15,
             "givenBy": "Astray"
         }
     ]

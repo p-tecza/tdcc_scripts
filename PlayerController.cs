@@ -298,8 +298,13 @@ public class PlayerController : MonoBehaviour
 
         if(collision.gameObject.layer == questItemsLayer)
         {
-            PickUpQuestItem(collision.gameObject);
-            Destroy(collision.gameObject);
+            QuestItem questItem = collision.gameObject.GetComponent<QuestItem>();
+
+            if (questItem.CanPickUp())
+            {
+                PickUpQuestItem(collision.gameObject);
+                Destroy(collision.gameObject);
+            }
         }
 
     }
@@ -513,6 +518,21 @@ public class PlayerController : MonoBehaviour
         this.isQuestActive = true;
         this.gameController.PickUpQuest();
         this.gameController.SetQuestData(questData);
+    }
+
+    public void AddQuestReward(QuestReward reward)
+    {
+        string rewardType = reward.GetRewardType();
+        if (rewardType == "Money")
+        {
+            this.moneyAmount += reward.GetMoneyAmount();
+            this.gameController.UpdateUICoinsAmount(this.moneyAmount);
+        }
+        else if(rewardType == "Item")
+        {
+            // TODO Handling Items in equipment
+        }
+
     }
 
     public List<QuestItem> GetOwnedQuestItems()

@@ -272,6 +272,11 @@ public class GameController : MonoBehaviour
 
     }
 
+    public void ResolveQuestReward(QuestReward reward)
+    {
+        this.playerController.AddQuestReward(reward);
+    }
+
 /*    public AllInteractiveDialogData GetAllNPCDialogData()
     {
         Debug.Log("GETTING NPC DATA");

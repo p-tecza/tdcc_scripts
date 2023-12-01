@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using TMPro;
 using UnityEngine;
 
@@ -19,7 +20,7 @@ public class QuestController : MonoBehaviour
     private int questProgressThreshold = 1;
     private bool isQuestActive = false;
     private bool isQuestCompleted = false;
-
+    private float moneyRewardMultiplier = 1;
 
     private static readonly string QUEST_ASTRAY_ITEM_NAME = "Necklace";
 
@@ -76,7 +77,9 @@ public class QuestController : MonoBehaviour
                 return 1;
             case "Purge":
                 int allEnemiesInDung = this.gameController.GetAmountOfAllEnemiesInDungeonFloor();
-                int enemiesThreshold = Mathf.FloorToInt(allEnemiesInDung / 4);
+                int random = UnityEngine.Random.Range(2, 5);
+                this.moneyRewardMultiplier = 1 + 0.5f * (4 - random);
+                int enemiesThreshold = Mathf.FloorToInt(allEnemiesInDung / random);
                 this.questProgressThreshold = enemiesThreshold;
                 return enemiesThreshold;
             default: break;
@@ -155,13 +158,17 @@ public class QuestController : MonoBehaviour
 
     public (string, string) GetStateDataOfQuestForInteractionWindow()
     {
-        if(this.isQuestActive && !this.isQuestCompleted)
+        if(GetQuestState() == QuestState.STARTED)
         {
             return (this.currentQuestData.questNotCompletedYetDialog, "Quit");
         }
-        else if (this.isQuestActive && this.isQuestCompleted)
+        else if (GetQuestState() == QuestState.FINISHED)
         {
             return (this.currentQuestData.questCompletedDialog, "Finish");
+        }
+        else if (GetQuestState() == QuestState.SOLVED)
+        {
+            return (this.currentQuestData.questSolvedDialog, "Quit");
         }
         return ("", "");
     }
@@ -191,10 +198,31 @@ public class QuestController : MonoBehaviour
         Debug.Log("FINISHED THE QUEST!!!!!");
         // TODO logic for reward...
         // TODO Dialog Window after quest solved
+        QuestReward questReward = DetermineQuestReward();
+        this.gameController.ResolveQuestReward(questReward);
         this.isQuestActive = false;
         this.questPickedUp.SetActive(false);
         this.questCompleted.SetActive(false);
         this.questWindowObject.SetActive(false);
-        
     }
+
+    public QuestData GetCurrentQuestData() // 1st - dialog, 2nd - option
+    {
+        return this.currentQuestData;
+    }
+
+    private QuestReward DetermineQuestReward()
+    {
+        string questReward = this.currentQuestData.questReward;
+        if(questReward == "Money")
+        {
+            return new QuestReward("Money", (int)(this.currentQuestData.questRewardAmount * this.moneyRewardMultiplier), "");
+        }
+        else if(questReward == "Item")
+        {
+            return new QuestReward("Item", 0, "Bones");
+        }
+        return new QuestReward("", 0, "");
+    }
+
 }

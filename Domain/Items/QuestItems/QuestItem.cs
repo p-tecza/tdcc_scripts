@@ -9,6 +9,7 @@ public class QuestItem : MonoBehaviour
     private Vector2 definedPopUpForce = new Vector2(0, 1);
     private float forceMultiplier = 3f;
     private float returnForceDelay = 0.15f;
+    private bool isDropAnimationOn = true;
 
     protected void CreateDropAnimation()
     {
@@ -27,6 +28,12 @@ public class QuestItem : MonoBehaviour
     {
         Debug.Log("ZATRZYMUJE");
         gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeAll;
+        this.isDropAnimationOn = false;
+    }
+
+    public bool CanPickUp()
+    {
+        return !this.isDropAnimationOn;
     }
 
 }
