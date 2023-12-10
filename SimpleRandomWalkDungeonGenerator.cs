@@ -28,7 +28,7 @@ public class SimpleRandomWalkDungeonGenerator : AbstractDungeonGenerator
         
     }
 
-    protected override void RunProceduralGeneration(){
+    protected override void RunProceduralGeneration(int currentLvl){
         HashSet<Vector2Int> floorPositions = RunRandomWalk(randomWalkParameters, startRandomWalkPosition);
         //tilemapVisualizer.Clear();
         foreach(var position in floorPositions){
@@ -71,8 +71,4 @@ public class SimpleRandomWalkDungeonGenerator : AbstractDungeonGenerator
         return roomTiles;
     }
 
-    protected override void DestroyAllCreatedPrefabs()
-    {
-        /*throw new System.NotImplementedException();*/
-    }
 }

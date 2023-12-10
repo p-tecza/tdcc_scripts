@@ -18,7 +18,7 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
     private bool randomWalkRooms = false;
 
 
-    protected override void RunProceduralGeneration()
+    protected override void RunProceduralGeneration(int currentLvl)
     {
         CreateRooms();
     }

@@ -19,6 +19,7 @@ public class AstrayNPC : NPC
         if(list.Count > 0)
         {
             questData = list[UnityEngine.Random.Range(0, list.Count)];
+            questData = list[1];
             if(questData.questGoal == "Retrieve item")
             {
                 

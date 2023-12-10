@@ -112,6 +112,16 @@ public class PlayerController : MonoBehaviour
             
     }
 
+    public void SetUpCharacterForNextDungeonLevel()
+    {
+        this.roomInfo = FullDungeonGenerator.GetFinalizedRooms();
+        this.enableTeleports = true;
+        this.enableMovement = true;
+        this.stopAllActions = false;
+        this.currentRoom = this.roomInfo[this.startingRoomID];
+        this.ownedQuestItems = new List<QuestItem>();
+    }
+
     void FixedUpdate()
     {
         if (this.enableMovement)
@@ -197,6 +207,12 @@ public class PlayerController : MonoBehaviour
 
         }
 
+        if(collision.gameObject.tag == "NextLevelTeleport" && enableTeleports)
+        {
+            Debug.Log("SCHODZIMY NIZEJ");
+            this.gameController.CreateNextDungeonLevel();
+        }
+
         if(collision.gameObject.tag == "Enemy")
         {
             TakeDamage(this.onCollisionDamage);
@@ -246,9 +262,7 @@ public class PlayerController : MonoBehaviour
             }
             SetMoneyAmountAndUpdateUI(this.moneyAmount - ShopRoom.costs["hpPotion"]);
             PickUpCollectable(shopObject);
-            this.gameController.RemoveItemRelatedPriceText(shopObject);
             RemovePickedUpObject(shopObject);
-            /*GameController.RemoveItemHint(shopObject);*/
         }
         else if(shopObjectName == "Star(Clone)")
         {
@@ -258,9 +272,7 @@ public class PlayerController : MonoBehaviour
             }
             SetMoneyAmountAndUpdateUI(this.moneyAmount - ShopRoom.costs["star"]);
             PickUpCollectable(shopObject);
-            this.gameController.RemoveItemRelatedPriceText(shopObject);
             RemovePickedUpObject(shopObject);
-            /*GameController.RemoveItemHint(shopObject);*/
         }
         else
         {
@@ -270,9 +282,7 @@ public class PlayerController : MonoBehaviour
             }
             SetMoneyAmountAndUpdateUI(this.moneyAmount - ShopRoom.costs["item"]);
             PickUpItem(shopObject);
-            this.gameController.RemoveItemRelatedPriceText(shopObject);
             RemovePickedUpObject(shopObject);
-            /*GameController.RemoveItemHint(shopObject);*/
         }
     }
 
@@ -410,6 +420,7 @@ public class PlayerController : MonoBehaviour
     {
         foreach (GameObject e in this.currentRoom.enemies)
         {
+            if (e != null)
             e.GetComponent<Enemy>().ActivateEnemy();
         }
     }

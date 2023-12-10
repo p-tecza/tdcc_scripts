@@ -18,12 +18,17 @@ public abstract class AbstractDungeonGenerator : MonoBehaviour
     public void GenerateDungeon(){
         tilemapVisualizer.Clear();
         lineController.ResetLines(0);
-        DestroyAllCreatedPrefabs();
-        RunProceduralGeneration();
+        RunProceduralGeneration(1);
     }
 
-    protected abstract void RunProceduralGeneration();
+    public void GenerateDungeonNextLevel(int lvl)
+    {
+        tilemapVisualizer.Clear();
+        lineController.ResetLines(0);
+        RunProceduralGeneration(lvl);
+    }
 
-    protected abstract void DestroyAllCreatedPrefabs();
+    protected abstract void RunProceduralGeneration(int currentLvl);
+
 
 }

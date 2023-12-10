@@ -26,7 +26,7 @@ namespace Assets._Scripts
         protected int numberOfRooms=10;
 
 
-        protected override void RunProceduralGeneration()
+        protected override void RunProceduralGeneration(int currentLvl)
         {
             HashSet<Vector2Int> floorPositions = GenerateRooms(100);
             tilemapVisualizer.Clear();
@@ -201,9 +201,5 @@ namespace Assets._Scripts
             return new Vector2Int(width,height);
         }
 
-        protected override void DestroyAllCreatedPrefabs()
-        {
-            /*throw new NotImplementedException();*/
-        }
     }
 }

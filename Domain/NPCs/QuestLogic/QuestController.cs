@@ -225,4 +225,10 @@ public class QuestController : MonoBehaviour
         return new QuestReward("", 0, "");
     }
 
+    public void ResetQuestStateOnNextDungeonLevel()
+    {
+        this.isQuestCompleted = false;
+        this.isQuestActive = false;
+    }
+
 }

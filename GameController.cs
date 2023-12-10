@@ -17,8 +17,6 @@ public class GameController : MonoBehaviour
 
     public GameOverScreen gameOverScreen;
 
-    /*private AllItemsData allItemsData;*/
-
     [SerializeField]
     private PlayerController playerController;
 
@@ -57,13 +55,11 @@ public class GameController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
-        if(currentLvl == 0)
+        currentLvl++;
+        if (currentLvl == 1)
         {
             this.InitializeRepositories();
         }
-
-        /*this.allItemsData = DataReader.ReadAllItemsData();*/
         dungeonGenerator.GenerateDungeon();
         Vector3 startPosition = dungeonGenerator.GetStartingPosition();
         playerObject.transform.position = startPosition;
@@ -74,7 +70,17 @@ public class GameController : MonoBehaviour
         InitEnemiesTracker();
         PlayerStats ps = playerObject.GetComponent<PlayerController>().GetStats();
         UpdateUIPlayerStats(ps);
+    }
+
+    public void CreateNextDungeonLevel()
+    {
         currentLvl++;
+        dungeonGenerator.GenerateDungeonNextLevel(currentLvl);
+        Vector3 startPosition = dungeonGenerator.GetStartingPosition();
+        playerObject.transform.position = startPosition;
+        mainCamera.transform.position = startPosition;
+        this.ResetQuestsOnNextDungeonLevel();
+        playerController.SetUpCharacterForNextDungeonLevel();
     }
 
     // Update is called once per frame
@@ -122,26 +128,6 @@ public class GameController : MonoBehaviour
     public static List<int> GetAvailableSpecificItemLoot()
     {
         return availableSpecificItemLoot;
-    }
-
-    public void RemoveItemRelatedPriceText(GameObject shopObject)
-    {
-
-        // name of shop item pricetext must be unique, add some sort of iterator for specific dung lvl
-
-        string nameOfPriceText = "PriceText" + shopObject.name;
-        GameObject canvasObject = this.priceCanvas.gameObject;
-        int childrenCount = canvasObject.transform.childCount;
-        for (int i = 0; i < childrenCount; i++)
-        {
-            GameObject childObject = canvasObject.transform.GetChild(i).gameObject;
-            Debug.Log(childObject.name + "(Clone)");
-            Debug.Log(nameOfPriceText);
-            if (childObject.name + "(Clone)" == nameOfPriceText)
-            {
-                Destroy(childObject);
-            }
-        }
     }
 
     public void AddNewHint(Vector3 itemPosition, GameObject gameObject)
@@ -277,11 +263,9 @@ public class GameController : MonoBehaviour
         this.playerController.AddQuestReward(reward);
     }
 
-/*    public AllInteractiveDialogData GetAllNPCDialogData()
+    public void ResetQuestsOnNextDungeonLevel()
     {
-        Debug.Log("GETTING NPC DATA");
-
-        return this.allNPCDialogData;
-    }*/
+        this.questController.ResetQuestStateOnNextDungeonLevel();
+    }
 
 }

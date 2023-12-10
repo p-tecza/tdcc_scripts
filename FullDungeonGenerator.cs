@@ -38,22 +38,38 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
     private static Dictionary<int, Room> finalizedRooms = new Dictionary<int, Room>();
     [SerializeField]
     public ShopRoomGenerator shopRoomGenerator;
+    [SerializeField]
+    private BossRoomGenerator bossRoomGenerator;
     private SpecialRoomDeterminer specialRoomDeterminer;
+    [SerializeField]
+    private GameObject instantiatedDungeonObjects;
     
 
-    protected override void RunProceduralGeneration()
+    protected override void RunProceduralGeneration(int level)
     {
-        if (this.isSeeded)
+
+        if (this.isSeeded && level == 1)
         {
             UnityEngine.Random.InitState(this.seed);
             ProceduralGenerationAlgorithms.InitSeed(this.seed);
             Debug.Log("SEEDED");
         }
-        else
+        else if(level == 1)
         {
             Debug.Log("NOT SEEDED");
             UnityEngine.Random.InitState(UnityEngine.Random.Range(0,int.MaxValue));
             ProceduralGenerationAlgorithms.InitSeed(UnityEngine.Random.Range(0,int.MaxValue));
+        }
+        else
+        {
+            finalizedRooms = new Dictionary<int, Room>();
+            int oldInstantiatedObjectsAmount = this.instantiatedDungeonObjects.transform.childCount;
+
+            for(int i = 0; i < oldInstantiatedObjectsAmount; i++)
+            {
+                Destroy(this.instantiatedDungeonObjects.transform.GetChild(i).gameObject);
+            }
+
         }
 
         specialRoomDeterminer = new SpecialRoomDeterminer();
@@ -115,6 +131,9 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
 
         List<GraphConnection> dungeonStructure = GridAlgorithm.GenerateDungeonStructure(finalizedRooms);
         specialRoomDeterminer.bossRoomID = specialRoomDeterminer.DetermineBossRoom();
+        this.bossRoomGenerator.SetUpBossRoom(finalizedRooms[specialRoomDeterminer.bossRoomID], this.instantiatedDungeonObjects);
+
+
         specialRoomDeterminer.startingRoomID = specialRoomDeterminer.DetermineStartingRoom();
         // order matters for specialRoomDeterminer
         // shopRoomID has to be determined at the end
@@ -146,7 +165,8 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         finalizedRooms = CreateNonLinearPassagesBetweenRooms(finalizedRooms, GridAlgorithm.gg);
 
         finalizedRooms[specialRoomDeterminer.shopRoomID] =
-            shopRoomGenerator.GenerateShop(finalizedRooms[specialRoomDeterminer.shopRoomID], tilemapVisualizer);
+            shopRoomGenerator.GenerateShop(finalizedRooms[specialRoomDeterminer.shopRoomID], tilemapVisualizer,
+            this.instantiatedDungeonObjects);
 
         MarkRoom(finalizedRooms[specialRoomDeterminer.startingRoomID].FloorTiles, Color.green);
         MarkRoom(finalizedRooms[specialRoomDeterminer.bossRoomID].FloorTiles, Color.red);
@@ -159,9 +179,14 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
 
     private void SetStateOfGlobalLoot(int amountOfPossibleTreasures)
     {
+        Debug.Log("SETTING STATE OF GLOBAL LOOT");
         List<int> list = new List<int>();
         for (int i = 0; i < amountOfPossibleTreasures; i++) { list.Add(i); }
         GameController.SetAvailableSpecificItemLoot(list);
+        foreach(var x in GameController.GetAvailableSpecificItemLoot())
+        {
+            Debug.Log(x + "<-itemId");
+        }
     }
 
     private Dictionary<string, int> GetSpecificTreasureContent(Dictionary<string, int> all, int whichRoom)
@@ -225,7 +250,7 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
             }
 
             randNumOfEnemies = UnityEngine.Random.Range(1, maxEnemiesInRoom);
-            HashSet<GameObject> enemiesInRoom = new HashSet<GameObject>(); //do zmiany, trzeba dopisaæ do listy pokoju
+            /*HashSet<GameObject> enemiesInRoom = new HashSet<GameObject>(); //do zmiany, trzeba dopisaæ do listy pokoju*/
 
             for (int i = 0; i < randNumOfEnemies; i++)
             {
@@ -236,11 +261,12 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
                 GameObject typeOfEnemy = DetermineTypeOfEnemy(value);
 
                 GameObject enemy = Instantiate(typeOfEnemy, ((Vector3Int)randomField), Quaternion.identity);
+                enemy.transform.SetParent(this.instantiatedDungeonObjects.transform, true);
                 this.enemies.Add(enemy);
                 room.enemies.Add(enemy);
             }
 
-            room.RoomObjects = enemiesInRoom;
+            /*room.RoomObjects = enemiesInRoom;*/
 
 
         }
@@ -271,9 +297,10 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
             for (int i = 0; i < randNumOfCoins; i++)
             {
                 Vector2Int randomField = room.FloorTiles.ElementAt(UnityEngine.Random.Range(0, room.FloorTiles.Count));
-                GameObject enemy = Instantiate(this.coinsPrefab, ((Vector3Int)randomField), Quaternion.identity);
-                this.coins.Add(enemy);
-                currentObjectsInRoom.Add(enemy);
+                GameObject coin = Instantiate(this.coinsPrefab, ((Vector3Int)randomField), Quaternion.identity);
+                coin.transform.SetParent(this.instantiatedDungeonObjects.transform, true);
+                this.coins.Add(coin);
+                currentObjectsInRoom.Add(coin);
             }
             room.RoomObjects = currentObjectsInRoom;
 
@@ -359,9 +386,10 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
     private void GenerateTreasureRoomsPrefabs(HashSet<Vector2Int> roomTiles, Dictionary<string, int> treasureContent)
     {
         Vector2Int position = RoomHelper.DetermineRoomCenter(roomTiles);
-        GameObject cosTam = Instantiate(this.treasurePrefab, (Vector3Int)position, Quaternion.identity);
-        this.treasures.Add(cosTam);
-        cosTam.GetComponent<Treasure>().SetContent(treasureContent);
+        GameObject treasure = Instantiate(this.treasurePrefab, (Vector3Int)position, Quaternion.identity);
+        treasure.transform.SetParent(this.instantiatedDungeonObjects.transform, true);
+        this.treasures.Add(treasure);
+        treasure.GetComponent<Treasure>().SetContent(treasureContent);
     }
 
     private void GenerateTeleportPrefab(Vector2Int position, int rotationAngles, Teleport t)
@@ -369,6 +397,7 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         Vector3 fixedPosition = new Vector3(position.x + 0.5f, position.y + 0.5f, 0);
         Quaternion rotation = Quaternion.Euler(0, 0, rotationAngles);
         GameObject teleportObject = Instantiate(this.teleportPrefab, fixedPosition, rotation);
+        teleportObject.transform.SetParent(this.instantiatedDungeonObjects.transform, true);
         teleportObject.GetComponent<TeleportMonoBehaviour>().teleportInfo = t;
         /*this.exits.Add(exitObject);*/
     }
@@ -412,40 +441,6 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         }
         return teleportLocation;
 
-    }
-
-    protected override void DestroyAllCreatedPrefabs()
-    {
-        foreach (GameObject go in this.treasures)
-        {
-            DestroyImmediate(go);
-            Debug.Log("DESTROYING " + go.ToString());
-        }
-        foreach (GameObject go in this.enemies)
-        {
-            DestroyImmediate(go);
-            Debug.Log("DESTROYING " + go.ToString());
-        }
-        foreach (GameObject go in this.coins)
-        {
-            DestroyImmediate(go);
-            Debug.Log("DESTROYING " + go.ToString());
-        }
-/*        foreach (GameObject go in this.exits)
-        {
-            DestroyImmediate(go);
-            Debug.Log("DESTROYING " + go.ToString());
-        }*/
-        foreach (GameObject go in this.entrances)
-        {
-            DestroyImmediate(go);
-            Debug.Log("DESTROYING " + go.ToString());
-        }
-        this.treasures = new List<GameObject>();
-        this.enemies = new List<GameObject>();
-        this.coins = new List<GameObject>();
-/*        this.exits = new List<GameObject>();*/
-        this.entrances = new List<GameObject>();
     }
 
     private int DetermineRotationOfTeleport(Vector2Int tile, HashSet<Vector2Int> roomTiles)
