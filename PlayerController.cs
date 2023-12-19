@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -80,6 +81,7 @@ public class PlayerController : MonoBehaviour
     private bool isQuestActive;
     private int questItemsLayer;
 
+    private bool enabledNextLevelTeleport;
     public void SetUpCharacter()
     {
         this.playerObject.SetActive(true);
@@ -94,6 +96,7 @@ public class PlayerController : MonoBehaviour
         this.currentRoom = this.roomInfo[this.startingRoomID];
         this.playerCurrentHealth = this.playerMaxHealth;
         this.stopAllActions = false;
+        this.enabledNextLevelTeleport = false;
         this.gameController.UpdateUICollectables(this.ownedHpPotions, this.ownedStars);
 
         //TEMP
@@ -120,6 +123,7 @@ public class PlayerController : MonoBehaviour
         this.stopAllActions = false;
         this.currentRoom = this.roomInfo[this.startingRoomID];
         this.ownedQuestItems = new List<QuestItem>();
+        this.enabledNextLevelTeleport = false;
     }
 
     void FixedUpdate()
@@ -163,13 +167,6 @@ public class PlayerController : MonoBehaviour
 
             }     
 
-            //Temporary solution
-            if (Input.GetKey(KeyCode.Return) && !this.enableTeleports)
-            {
-                this.DisableEnemiesInRoom();
-                this.enableTeleports = true;
-            }
-
         }
 
     }
@@ -181,8 +178,23 @@ public class PlayerController : MonoBehaviour
             this.animator.SetTrigger("attack");
             this.isAttacking = true;
         }
-       
+
+        // Admin 
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            this.SmiteAllEnemies_ADMIN();
+        }
+
     }
+
+/*    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "NextLevelTeleport")
+        {
+            Debug.Log("SCHODZIMY NIZEJ");
+            this.enabledNextLevelTeleport = ;
+        }
+    }*/
 
     void OnCollisionEnter2D(Collision2D collision)
     {
@@ -201,6 +213,8 @@ public class PlayerController : MonoBehaviour
             this.enableMovement = false;
             this.playerObject.transform.position = new Vector3(teleportObject.teleportTo.x, teleportObject.teleportTo.y, 0);
             this.currentRoom = this.roomInfo[teleportObject.teleportToRoomId];
+            SetProperTeleportSprites();
+            Invoke("EnableTeleportsOnEmptyRoom", enterRoomIdleDelay);
             Invoke("EnableMovement", enterRoomIdleDelay);
             Invoke("EnableEnemiesInRoom", enterRoomIdleDelay);
             //-------------
@@ -210,7 +224,10 @@ public class PlayerController : MonoBehaviour
         if(collision.gameObject.tag == "NextLevelTeleport" && enableTeleports)
         {
             Debug.Log("SCHODZIMY NIZEJ");
-            this.gameController.CreateNextDungeonLevel();
+            if (this.enabledNextLevelTeleport)
+            {
+                this.gameController.CreateNextDungeonLevel();
+            }
         }
 
         if(collision.gameObject.tag == "Enemy")
@@ -250,6 +267,25 @@ public class PlayerController : MonoBehaviour
         }
 
     }
+
+    private void SetProperTeleportSprites()
+    {
+        if (this.enableTeleports)
+        {
+            foreach(GameObject teleportObj in this.currentRoom.teleportObjects)
+            {
+                teleportObj.GetComponent<TeleportMonoBehaviour>().SetOpenImage();
+            }
+        }
+        else
+        {
+            foreach (GameObject teleportObj in this.currentRoom.teleportObjects)
+            {
+                teleportObj.GetComponent<TeleportMonoBehaviour>().SetClosedImage();
+            }
+        }
+    }
+
 
     private void TryToPickUpShopItem(GameObject shopObject)
     {
@@ -358,11 +394,27 @@ public class PlayerController : MonoBehaviour
         this.stats.movementSpeed += item.movementSpeed;
     }
 
+    public void CheckIfRoomIsCleared(GameObject enemyObject)
+    {
+
+
+        if (this.currentRoom.enemies.Contains(enemyObject))
+        {
+            this.currentRoom.enemies.Remove(enemyObject);
+        }
+
+        Debug.Log("CHEK IF ROOM CLEARED");
+        Debug.Log("CNT: " + this.currentRoom.enemies.Count);
+        if(this.currentRoom.enemies.Count <= 0) {
+            this.enableTeleports = true;
+            SetProperTeleportSprites();
+        }
+    }
+
     void AttackAnimationEnd()
     {
         this.isAttacking = false;
     }
-
 
     void DealDamage()
     {
@@ -378,6 +430,14 @@ public class PlayerController : MonoBehaviour
     void GameOver()
     {
         this.gameController.GameOver();
+    }
+    private void EnableTeleportsOnEmptyRoom()
+    {
+        if(this.currentRoom.enemies.Count <= 0)
+        {
+            this.enableTeleports = true;
+            SetProperTeleportSprites();
+        }
     }
 
     public void PickUpCoin()
@@ -396,6 +456,7 @@ public class PlayerController : MonoBehaviour
         this.animator.SetBool("isRunning", false);
         this.animator.SetTrigger("hurt");
 
+        isAttacking = false;
 
         if (this.playerCurrentHealth <= 0)
         {
@@ -563,6 +624,20 @@ public class PlayerController : MonoBehaviour
             return;
 
         Gizmos.DrawWireSphere(playerInteractionPoint.position, this.playerInteractionRange);
+    }
+
+    private void SmiteAllEnemies_ADMIN()
+    {
+        foreach(GameObject go in this.currentRoom.enemies)
+        {
+            Enemy x = go.GetComponent<Enemy>();
+            x.TakeDamage(999999);
+        }
+    }
+
+    public void EnableNextLevelTeleport()
+    {
+        this.enabledNextLevelTeleport = true;
     }
 
 }

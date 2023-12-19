@@ -247,7 +247,13 @@ public class BasicEnemy : Enemy
         this.gameController.UpdateQuestProgress();
         /*Invoke("DropItem", this.destroyBodyAfterSeconds / 4);*/
         DropItem();
+        Invoke("AcknowledgeEnemyDeath", 1f);
         Destroy(gameObject, this.destroyBodyAfterSeconds);
+    }
+
+    private void AcknowledgeEnemyDeath()
+    {
+        base.AcknowledgeDeath(this.gameObject);
     }
 
     private void DropItem()

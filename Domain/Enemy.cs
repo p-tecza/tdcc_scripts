@@ -59,4 +59,10 @@ public abstract class Enemy : MonoBehaviour
             obj.transform.position = this.gameObject.transform.position;
         }
     }
+
+    protected void AcknowledgeDeath(GameObject enemyObject)
+    {
+        this.gameController.TryToOpenTeleports(enemyObject);
+    }
+
 }

@@ -332,7 +332,7 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
                 Vector2Int tileToMark = t.teleportFrom;
                 DeleteSingleTile(tileToMark);
                 int rotationAngles = DetermineRotationOfTeleport(tileToMark, room.FloorTiles);
-                GenerateTeleportPrefab(tileToMark, rotationAngles, t);
+                GenerateTeleportPrefab(tileToMark, rotationAngles, t, room);
                 CreateWallTilesAroundTeleport(tileToMark, room.FloorTiles, room.WallTiles);
             }
         }
@@ -392,13 +392,14 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         treasure.GetComponent<Treasure>().SetContent(treasureContent);
     }
 
-    private void GenerateTeleportPrefab(Vector2Int position, int rotationAngles, Teleport t)
+    private void GenerateTeleportPrefab(Vector2Int position, int rotationAngles, Teleport t, Room room)
     {
         Vector3 fixedPosition = new Vector3(position.x + 0.5f, position.y + 0.5f, 0);
         Quaternion rotation = Quaternion.Euler(0, 0, rotationAngles);
         GameObject teleportObject = Instantiate(this.teleportPrefab, fixedPosition, rotation);
         teleportObject.transform.SetParent(this.instantiatedDungeonObjects.transform, true);
         teleportObject.GetComponent<TeleportMonoBehaviour>().teleportInfo = t;
+        room.teleportObjects.Add(teleportObject);
         /*this.exits.Add(exitObject);*/
     }
 

@@ -15,6 +15,7 @@ public class Room
     public int Id { get; set; }
     public List<int> connections { get; set; }
     public List<Teleport> teleports { get; set; }
+    public List<GameObject> teleportObjects { get; set; }
     public Teleport entrance { get; set; }
     public Teleport exit {  get; set; }
     public bool isComplex { get; set; }
@@ -27,6 +28,7 @@ public class Room
         this.enemies = new List<GameObject>();
         this.connections = new List<int>();
         this.teleports = new List<Teleport>();
+        this.teleportObjects = new List<GameObject>();
         this.isComplex = isComplex; 
     }
 

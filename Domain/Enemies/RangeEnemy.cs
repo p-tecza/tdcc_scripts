@@ -238,8 +238,15 @@ public class RangeEnemy : Enemy
         this.gameController.UpdateQuestProgress();
         DropItem();
         /*DropItem();*/
+        Invoke("AcknowledgeEnemyDeath", 1f);
         Destroy(gameObject, this.destroyBodyAfterSeconds);
     }
+
+    private void AcknowledgeEnemyDeath()
+    {
+        base.AcknowledgeDeath(this.gameObject);
+    }
+
     private void DropItem()
     {
         base.DropHeldItem();

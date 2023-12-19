@@ -51,6 +51,8 @@ public class GameController : MonoBehaviour
     public EnemiesTracker enemiesTracker;
     [SerializeField]
     private GameObject parentQuestItemsObject;
+    [SerializeField]
+    private BossRoomGenerator bossRoomGenerator;
 
     // Start is called before the first frame update
     void Start()
@@ -117,7 +119,6 @@ public class GameController : MonoBehaviour
 
     public static void RemoveItemFromAvailableSpecificItemLoot(int itemId)
     {
-        Debug.Log(itemId);
         availableSpecificItemLoot.Remove(itemId);
     }
     public static void SetAvailableSpecificItemLoot(List<int> availableLoot)
@@ -258,6 +259,11 @@ public class GameController : MonoBehaviour
 
     }
 
+    public void TryToOpenTeleports(GameObject enemyObject)
+    {
+        this.playerController.CheckIfRoomIsCleared(enemyObject);
+    }
+
     public void ResolveQuestReward(QuestReward reward)
     {
         this.playerController.AddQuestReward(reward);
@@ -266,6 +272,11 @@ public class GameController : MonoBehaviour
     public void ResetQuestsOnNextDungeonLevel()
     {
         this.questController.ResetQuestStateOnNextDungeonLevel();
+    }
+
+    public void ShowNextLevelTeleport()
+    {
+        this.bossRoomGenerator.OpenNextLevelTeleport();
     }
 
 }
