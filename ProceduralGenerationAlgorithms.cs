@@ -11,6 +11,7 @@ public static class ProceduralGenerationAlgorithms {
     {
         UnityEngine.Random.InitState(seed);
         Debug.Log("SEED: " + seed);
+        Debug.Log("UNITY RAND STATE:" + UnityEngine.Random.state);
     }
     
 

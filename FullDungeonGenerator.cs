@@ -43,15 +43,28 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
     private SpecialRoomDeterminer specialRoomDeterminer;
     [SerializeField]
     private GameObject instantiatedDungeonObjects;
-    
+
+    /*UnityEngine.Random.State testState;*/
+    public static bool isThisSavedGame = false;
 
     protected override void RunProceduralGeneration(int level)
     {
 
-        if (this.isSeeded && level == 1)
+        /*SaveSystem.SaveData();*/
+
+        Debug.Log("OTRZYMANE DANE: " + SaveSystem.LoadData());
+
+        if(isThisSavedGame)
+        {
+            UnityEngine.Random.state = SaveSystem.LoadData().gameState;
+            isThisSavedGame = false;
+        }
+        else if (this.isSeeded && level == 1)
         {
             UnityEngine.Random.InitState(this.seed);
+            /*testState = UnityEngine.Random.state;*/
             ProceduralGenerationAlgorithms.InitSeed(this.seed);
+            SaveSystem.gameState = UnityEngine.Random.state;
             Debug.Log("SEEDED");
         }
         else if(level == 1)
@@ -59,9 +72,13 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
             Debug.Log("NOT SEEDED");
             UnityEngine.Random.InitState(UnityEngine.Random.Range(0,int.MaxValue));
             ProceduralGenerationAlgorithms.InitSeed(UnityEngine.Random.Range(0,int.MaxValue));
+            SaveSystem.gameState = UnityEngine.Random.state;
         }
         else
         {
+
+            /*UnityEngine.Random.state = testState;*/
+            SaveSystem.gameState = UnityEngine.Random.state;
             finalizedRooms = new Dictionary<int, Room>();
             int oldInstantiatedObjectsAmount = this.instantiatedDungeonObjects.transform.childCount;
 
@@ -509,6 +526,15 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
     public static Dictionary<int, Room> GetFinalizedRooms()
     {
         return finalizedRooms;
+    }
+    public void ResetGenerationAfterMainMenuReturn()
+    {
+        finalizedRooms = new Dictionary<int, Room>();
+        int oldInstantiatedObjectsAmount = this.instantiatedDungeonObjects.transform.childCount;
+        for (int i = 0; i < oldInstantiatedObjectsAmount; i++)
+        {
+            Destroy(this.instantiatedDungeonObjects.transform.GetChild(i).gameObject);
+        }
     }
 
 }

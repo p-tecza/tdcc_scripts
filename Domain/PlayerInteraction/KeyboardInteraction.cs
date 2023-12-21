@@ -31,6 +31,12 @@ public class KeyboardInteraction : MonoBehaviour
             this.gameController.TryToInteractWithNearestEntity();
         }
 
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Debug.Log("PAUZA");
+            PauseManager.instance.Pause();
+        }
+
     }
 
 }

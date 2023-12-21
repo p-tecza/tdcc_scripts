@@ -279,4 +279,17 @@ public class GameController : MonoBehaviour
         this.bossRoomGenerator.OpenNextLevelTeleport();
     }
 
+    public void ResetAfterMainMenuReturn()
+    {
+        this.currentLvl = 1;
+        this.dungeonGenerator.ResetGenerationAfterMainMenuReturn();
+    }
+
+    public void GenerateDungeonForSavePurposes()
+    {
+        this.currentLvl = 1; //DO ZMIANY POZNIEJ
+        this.dungeonGenerator.ResetGenerationAfterMainMenuReturn();
+        this.dungeonGenerator.GenerateDungeon();
+    }
+
 }

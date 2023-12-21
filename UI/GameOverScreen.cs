@@ -6,6 +6,7 @@ public class GameOverScreen : MonoBehaviour
 {
     public void GameOverScreenPopUp()
     {
+        Time.timeScale = 0f;
         gameObject.SetActive(true);
     }
 }
