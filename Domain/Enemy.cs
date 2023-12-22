@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 public abstract class Enemy : MonoBehaviour
 {
+    public int enemyID;
     protected GameObject enemyObject { get; set; }
     [SerializeField]
     protected Slider healthSlider;
@@ -63,6 +64,17 @@ public abstract class Enemy : MonoBehaviour
     protected void AcknowledgeDeath(GameObject enemyObject)
     {
         this.gameController.TryToOpenTeleports(enemyObject);
+    }
+
+    public void SetEnemyID(int enemyID)
+    {
+        Debug.Log("SETTING ENEMY ID");
+        this.enemyID = enemyID;
+        GenerationEntityIDController.currentEnemyID += 1;
+    }
+    public int GetEnemyID()
+    {
+        return this.enemyID;
     }
 
 }

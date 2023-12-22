@@ -45,25 +45,32 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
     private GameObject instantiatedDungeonObjects;
 
     /*UnityEngine.Random.State testState;*/
-    public static bool isThisSavedGame = false;
+    /*public bool isThisSavedGame = UndestroyableSceneController.isThisGameFromSave;*/
+    private bool savedGameNeedsDeletionOfEntities = false;
+    private SaveData loadedData = null;
 
     protected override void RunProceduralGeneration(int level)
     {
 
-        /*SaveSystem.SaveData();*/
 
-        Debug.Log("OTRZYMANE DANE: " + SaveSystem.LoadData());
+        Debug.Log("IS THIS W FULL DUNG:" + UndestroyableSceneController.isThisGameFromSave);
 
-        if(isThisSavedGame)
+        if(UndestroyableSceneController.isThisGameFromSave)
         {
-            UnityEngine.Random.state = SaveSystem.LoadData().gameState;
-            isThisSavedGame = false;
+            Debug.Log("PROBA GENERACJI Z ZAPISANEGO STATE");
+            this.loadedData = SaveSystem.LoadData();
+            UnityEngine.Random.state = this.loadedData.gameState;
+            Debug.Log("PO GENERACJI DANE ENEMY:" + this.loadedData.slainEnemyIDs.Count);
+            Debug.Log("PO GENERACJI DANE COIN:" + this.loadedData.collectedCoinIDs.Count);
+            UndestroyableSceneController.isThisGameFromSave = false;
+            SaveSystem.gameState = UnityEngine.Random.state;
+            this.savedGameNeedsDeletionOfEntities = true;
         }
         else if (this.isSeeded && level == 1)
         {
             UnityEngine.Random.InitState(this.seed);
             /*testState = UnityEngine.Random.state;*/
-            ProceduralGenerationAlgorithms.InitSeed(this.seed);
+            /*ProceduralGenerationAlgorithms.InitSeed(this.seed);*/
             SaveSystem.gameState = UnityEngine.Random.state;
             Debug.Log("SEEDED");
         }
@@ -71,7 +78,7 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         {
             Debug.Log("NOT SEEDED");
             UnityEngine.Random.InitState(UnityEngine.Random.Range(0,int.MaxValue));
-            ProceduralGenerationAlgorithms.InitSeed(UnityEngine.Random.Range(0,int.MaxValue));
+            /*ProceduralGenerationAlgorithms.InitSeed(UnityEngine.Random.Range(0,int.MaxValue));*/
             SaveSystem.gameState = UnityEngine.Random.state;
         }
         else
@@ -88,6 +95,8 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
             }
 
         }
+        ProceduralGenerationAlgorithms.LogState();
+
 
         specialRoomDeterminer = new SpecialRoomDeterminer();
         Dictionary<Vector2Int, HashSet<Vector2Int>> rooms = base.RunBSPGeneration();
@@ -192,6 +201,82 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         GenerateEnemies();
         GenerateCoins();
 
+        if (this.savedGameNeedsDeletionOfEntities)
+        {
+            ProgressHolder.SetProgressFromPreviousSave(this.loadedData);
+            DeleteAllAlreadyDestroyedEntitiesFromSave();
+            RepairRooms();
+            this.savedGameNeedsDeletionOfEntities = false;
+        }
+
+    }
+
+    private void RepairRooms()
+    {
+        foreach(Room room in finalizedRooms.Values)
+        {
+            List<GameObject> temp = new List<GameObject>();
+            foreach(GameObject go in room.enemies)
+            {
+                if (!this.loadedData.slainEnemyIDs.Contains(go.GetComponent<Enemy>().GetEnemyID()))
+                {
+                    temp.Add(go);
+                }
+            }
+            room.enemies = new List<GameObject>(temp);
+        }
+    }
+
+    private void DeleteAllAlreadyDestroyedEntitiesFromSave()
+    {
+        List<int> enemyIDsToDelete = this.loadedData.slainEnemyIDs;
+        List<int> coinIDsToDelete = this.loadedData.collectedCoinIDs;
+        List<GameObject> finalEnemies = new List<GameObject>();
+        List<GameObject> finalCoins = new List<GameObject>();
+
+
+        foreach(int i in enemyIDsToDelete)
+        {
+            Debug.Log("TO DELETE ENEMY ID: " + i);
+        }
+
+        foreach(int i in coinIDsToDelete)
+        {
+            Debug.Log("TO DELETE COIN ID: " + i);
+        }
+
+        foreach(GameObject enemyObject in this.enemies)
+        {
+
+            Debug.Log("ENEMY ID: "+ enemyObject.GetComponent<Enemy>().GetEnemyID());
+
+            if (enemyIDsToDelete.Contains(enemyObject.GetComponent<Enemy>().GetEnemyID()))
+            {
+                Debug.Log("USUWAM enemy?!");
+                Destroy(enemyObject);
+            }
+            else
+            {
+                finalEnemies.Add(enemyObject);
+            }
+        }
+        this.enemies = finalEnemies;
+
+        foreach(GameObject coinObject in this.coins)
+        {
+
+            Debug.Log("COIN ID: "+coinObject.GetComponent<Coin>().GetCoinID());
+            if (coinIDsToDelete.Contains(coinObject.GetComponent<Coin>().GetCoinID()))
+            {
+                Debug.Log("USUWAM coin?!");
+                Destroy(coinObject);
+            }
+            else
+            {
+                finalCoins.Add(coinObject);
+            }
+        }
+        this.coins = finalCoins;
     }
 
     private void SetStateOfGlobalLoot(int amountOfPossibleTreasures)
@@ -287,7 +372,6 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
 
 
         }
-
     }
 
     private GameObject DetermineTypeOfEnemy(int value)
@@ -322,7 +406,6 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
             room.RoomObjects = currentObjectsInRoom;
 
         }
-
     }
 
     private Dictionary<int, Room> CreateNonLinearPassagesBetweenRooms(Dictionary<int, Room> finalizedRooms, GridAlgorithm.GridGraph gg)
@@ -530,6 +613,10 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
     public void ResetGenerationAfterMainMenuReturn()
     {
         finalizedRooms = new Dictionary<int, Room>();
+        if(this.instantiatedDungeonObjects == null)
+        {
+            return;
+        }
         int oldInstantiatedObjectsAmount = this.instantiatedDungeonObjects.transform.childCount;
         for (int i = 0; i < oldInstantiatedObjectsAmount; i++)
         {

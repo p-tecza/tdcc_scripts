@@ -34,6 +34,9 @@ public static class SaveSystem
             FileStream stream = new FileStream(path, FileMode.Open);
             SaveData retrievedData = binaryFormatter.Deserialize(stream) as SaveData;
             stream.Close();
+
+            Debug.Log("RETRIEVED DATA IS NULL??: " + retrievedData);
+
             return retrievedData;
         }
         else

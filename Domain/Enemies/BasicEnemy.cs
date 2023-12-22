@@ -7,7 +7,6 @@ using Unity.VisualScripting.Antlr3.Runtime.Collections;
 using Unity.VisualScripting.FullSerializer.Internal;
 using UnityEngine;
 using UnityEngine.UI;
-
 public class BasicEnemy : Enemy
 {
     public GameObject player;
@@ -40,8 +39,13 @@ public class BasicEnemy : Enemy
 
     private bool ignoreAvoidance = false;
 
+    private void Awake()
+    {
+        base.SetEnemyID(GenerationEntityIDController.currentEnemyID);
+    }
     void Start()
     {
+        
         this.currentHealth = this.healthPoints;
         BoxCollider2D enemyCollider = gameObject.GetComponent<BoxCollider2D>();
         this.colliderWidth = enemyCollider.size.x;
@@ -244,6 +248,7 @@ public class BasicEnemy : Enemy
         /*  this.GetComponent<Canvas>().enabled = false;*/
         this.animator.SetTrigger("gotKilled");
         this.gameController.enemiesTracker.EnemyDies();
+        ProgressHolder.slainEnemyIDs.Add(this.GetEnemyID());
         this.gameController.UpdateQuestProgress();
         /*Invoke("DropItem", this.destroyBodyAfterSeconds / 4);*/
         DropItem();

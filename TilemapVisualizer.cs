@@ -11,6 +11,11 @@ public class TilemapVisualizer : MonoBehaviour
     private TileBase floorTile0, floorTile1, floorTile2, wallTop, wallSide0, wallSide1, passageTile;
     [SerializeField]
     private TileBase complexFloorTile0, complexFloorTile1, complexFloorTile2;
+
+/*    private void OnDestroy()
+    {
+        Debug.Log("NISZCZE SIEEEE Z jakiegos powodu ")
+    }*/
     public void PaintFloorTiles(IEnumerable<Vector2Int> floorPositions, bool isComplex){
         if (isComplex)
         {
@@ -93,8 +98,14 @@ public class TilemapVisualizer : MonoBehaviour
     }
 
     public void Clear(){
-        floorTilemap.ClearAllTiles();
-        wallTilemap.ClearAllTiles();
+        if (floorTilemap != null)
+        {
+            floorTilemap.ClearAllTiles();
+        }
+        if(wallTilemap != null)
+        {
+            wallTilemap.ClearAllTiles();
+        }
     }
 
 

@@ -7,10 +7,8 @@ public static class ProceduralGenerationAlgorithms {
 
     public static int seed;
 
-    public static void InitSeed(int seed)
+    public static void LogState()
     {
-        UnityEngine.Random.InitState(seed);
-        Debug.Log("SEED: " + seed);
         Debug.Log("UNITY RAND STATE:" + UnityEngine.Random.state);
     }
     
@@ -20,7 +18,6 @@ public static class ProceduralGenerationAlgorithms {
         
         path.Add(startPosition);
         var previousPosition = startPosition;
-        /*UnityEngine.Random.InitState(seed);*/
         for (int i =0; i<walkLength; i++){
             int rand = UnityEngine.Random.Range(0, 4);
             var newPosition = previousPosition + Direction2D.GetCardinalDirection(rand);
@@ -34,7 +31,6 @@ public static class ProceduralGenerationAlgorithms {
     public static List<Vector2Int> RandomWalkCorridor(Vector2Int startPosition, int corridorLength, bool isSeeded, int seed){
         
         List<Vector2Int> corridor = new List<Vector2Int>();
-        /*UnityEngine.Random.InitState(seed);*/
         int rand = UnityEngine.Random.Range(0, 4);
         var direction = Direction2D.GetCardinalDirection(rand);
         var currentPosition = startPosition;
@@ -49,7 +45,6 @@ public static class ProceduralGenerationAlgorithms {
     public static List<BoundsInt> BinarySpacePartitioning(BoundsInt spaceToSplit, int minWidth, int minHeight)
     {
 
-        /*UnityEngine.Random.InitState(seed);*/
         Queue<BoundsInt> roomsQueue = new Queue<BoundsInt>();
         List<BoundsInt> roomsList = new List<BoundsInt>();
         roomsQueue.Enqueue(spaceToSplit);
@@ -99,7 +94,6 @@ public static class ProceduralGenerationAlgorithms {
 
     private static void SplitVertically(int minWidth, Queue<BoundsInt> roomsQueue, BoundsInt room)
     {
-        /*UnityEngine.Random.InitState(seed);*/
         var xSplit = UnityEngine.Random.Range(1, room.size.x);
         BoundsInt room1 = new BoundsInt(room.min, new Vector3Int(xSplit, room.size.y, room.size.z));
         BoundsInt room2 = new BoundsInt(new Vector3Int(room.min.x+xSplit,room.min.y,room.min.z),
@@ -112,7 +106,6 @@ public static class ProceduralGenerationAlgorithms {
 
     private static void SplitHorizontally(int minHeight, Queue<BoundsInt> roomsQueue, BoundsInt room)
     {
-        /*UnityEngine.Random.InitState(seed);*/
         var ySplit = UnityEngine.Random.Range(1, room.size.y);
         BoundsInt room1 = new BoundsInt(room.min, new Vector3Int(room.size.x, ySplit, room.size.z));
         BoundsInt room2 = new BoundsInt(new Vector3Int(room.min.x, room.min.y + ySplit, room.min.z),
@@ -123,7 +116,7 @@ public static class ProceduralGenerationAlgorithms {
     }
 }
 public static class Direction2D{
-    /*private static System.Random myRandomizer = new System.Random();*/
+
     public static List<Vector2Int> cardinalDirectionsList = new List<Vector2Int>{
         new Vector2Int(0,1),  //UP
         new Vector2Int(1,0),  //RIGHT
@@ -132,11 +125,7 @@ public static class Direction2D{
     };
 
     public static Vector2Int GetCardinalDirection(int index){
-        /*int nextRandInt = UnityEngine.Random.Range(0,cardinalDirectionsList.Count);*/
         return cardinalDirectionsList[index];
     }
-/*
-    public static void setupRandomizer(int seed){
-        myRandomizer = new System.Random(seed);
-    }*/
+
 }

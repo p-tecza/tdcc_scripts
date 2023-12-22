@@ -27,6 +27,12 @@ public class PauseManager : MonoBehaviour
     public void SaveAndReturnToMainMenu()
     {
         Debug.Log("TODO ZAPISYWANIE!!!");
+        SaveData data = new SaveData(
+            SaveSystem.gameState,
+            ProgressHolder.collectedCoinIDs,
+            ProgressHolder.slainEnemyIDs
+            );
+        SaveSystem.SaveData(data);
         GameSceneManager.instance.LoadMainMenuScene();
     }
 

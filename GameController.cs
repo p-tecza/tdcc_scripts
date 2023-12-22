@@ -54,6 +54,11 @@ public class GameController : MonoBehaviour
     [SerializeField]
     private BossRoomGenerator bossRoomGenerator;
 
+/*    private void Awake()
+    {
+        DontDestroyOnLoad(this.gameObject);
+    }*/
+
     // Start is called before the first frame update
     void Start()
     {
@@ -62,6 +67,8 @@ public class GameController : MonoBehaviour
         {
             this.InitializeRepositories();
         }
+        GenerationEntityIDController.ResetAllIDs();
+        ProgressHolder.ResetProgressIDs();
         dungeonGenerator.GenerateDungeon();
         Vector3 startPosition = dungeonGenerator.GetStartingPosition();
         playerObject.transform.position = startPosition;
@@ -76,6 +83,8 @@ public class GameController : MonoBehaviour
 
     public void CreateNextDungeonLevel()
     {
+        GenerationEntityIDController.ResetAllIDs();
+        ProgressHolder.ResetProgressIDs();
         currentLvl++;
         dungeonGenerator.GenerateDungeonNextLevel(currentLvl);
         Vector3 startPosition = dungeonGenerator.GetStartingPosition();
@@ -287,8 +296,9 @@ public class GameController : MonoBehaviour
 
     public void GenerateDungeonForSavePurposes()
     {
-        this.currentLvl = 1; //DO ZMIANY POZNIEJ
-        this.dungeonGenerator.ResetGenerationAfterMainMenuReturn();
+        this.currentLvl = 1; //DO ZMIANY POZNIEJ, musisz to zapisac w save data i sobie pobrac
+        /*this.dungeonGenerator.ResetGenerationAfterMainMenuReturn();*/
+        /*this.dungeonGenerator.isThisSavedGame = true;*/
         this.dungeonGenerator.GenerateDungeon();
     }
 

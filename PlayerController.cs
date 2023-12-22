@@ -242,6 +242,7 @@ public class PlayerController : MonoBehaviour
 
         if (collision.gameObject.tag == "Coin")
         {
+            ProgressHolder.collectedCoinIDs.Add(collision.gameObject.GetComponent<Coin>().GetCoinID());
             Destroy(collision.gameObject);
             PickUpCoin();
             ResetMyVelocity();
@@ -338,6 +339,7 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.gameObject.tag == "Coin")
         {
+            ProgressHolder.collectedCoinIDs.Add(collision.gameObject.GetComponent<Coin>().GetCoinID());
             Destroy(collision.gameObject);
             PickUpCoin();
         }

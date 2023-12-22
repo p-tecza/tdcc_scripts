@@ -40,6 +40,10 @@ public class RangeEnemy : Enemy
 
     private float timer = 0f;
 
+    private void Awake()
+    {
+        base.SetEnemyID(GenerationEntityIDController.currentEnemyID);
+    }
     void Start()
     {
         this.currentHealth = this.healthPoints;
@@ -235,6 +239,7 @@ public class RangeEnemy : Enemy
         this.GetComponent<Collider2D>().enabled = false;
         /*  this.GetComponent<Canvas>().enabled = false;*/
         this.gameController.enemiesTracker.EnemyDies();
+        ProgressHolder.slainEnemyIDs.Add(this.GetEnemyID());
         this.gameController.UpdateQuestProgress();
         DropItem();
         /*DropItem();*/

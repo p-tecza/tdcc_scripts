@@ -34,6 +34,11 @@ public class FirstBossEnemy : Enemy
     private bool isAttacking = false;
     private bool breakStreak = false;
 
+    private void Awake()
+    {
+        base.SetEnemyID(GenerationEntityIDController.currentEnemyID);
+    }
+
     void Start()
     {
         this.currentHealth = this.healthPoints;
@@ -140,6 +145,7 @@ public class FirstBossEnemy : Enemy
         this.isActive = false;
         this.GetComponent<Collider2D>().enabled = false;
         this.hpCanvas.enabled = false;
+        ProgressHolder.slainEnemyIDs.Add(this.GetEnemyID());
         Invoke("AcknowledgeEnemyDeath", 1f);
         Invoke("OpenNextLevelTeleport", 1f);
         Destroy(gameObject, this.destroyBodyAfterSeconds);

@@ -17,14 +17,14 @@ public abstract class AbstractDungeonGenerator : MonoBehaviour
 
     public void GenerateDungeon(){
         tilemapVisualizer.Clear();
-        lineController.ResetLines(0);
+        /*lineController.ResetLines(0);*/
         RunProceduralGeneration(1);
     }
 
     public void GenerateDungeonNextLevel(int lvl)
     {
         tilemapVisualizer.Clear();
-        lineController.ResetLines(0);
+        /*lineController.ResetLines(0);*/
         RunProceduralGeneration(lvl);
     }
 
