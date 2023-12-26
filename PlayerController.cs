@@ -109,8 +109,7 @@ public class PlayerController : MonoBehaviour
             this.playerAttackDamage,
             this.playerAttackSpeed,
             this.playerAttackRange,
-            this.playerMovementSpeed,
-            this.playerAttackType
+            this.playerMovementSpeed
             );
             
     }
@@ -214,7 +213,7 @@ public class PlayerController : MonoBehaviour
             this.playerObject.transform.position = new Vector3(teleportObject.teleportTo.x, teleportObject.teleportTo.y, 0);
             this.currentRoom = this.roomInfo[teleportObject.teleportToRoomId];
             SetProperTeleportSprites();
-            Invoke("EnableTeleportsOnEmptyRoom", enterRoomIdleDelay);
+            Invoke("EnableOrDistableTeleports", enterRoomIdleDelay);
             Invoke("EnableMovement", enterRoomIdleDelay);
             Invoke("EnableEnemiesInRoom", enterRoomIdleDelay);
             //-------------
@@ -237,7 +236,7 @@ public class PlayerController : MonoBehaviour
 
         if(collision.gameObject.tag == "TreasureChest")
         {
-            collision.gameObject.GetComponent<Treasure>().DropItems(this.transform);
+            collision.gameObject.GetComponent<Treasure>().DropItems(this.transform, false);
         }
 
         if (collision.gameObject.tag == "Coin")
@@ -398,13 +397,10 @@ public class PlayerController : MonoBehaviour
 
     public void CheckIfRoomIsCleared(GameObject enemyObject)
     {
-
-
         if (this.currentRoom.enemies.Contains(enemyObject))
         {
             this.currentRoom.enemies.Remove(enemyObject);
         }
-
         Debug.Log("CHEK IF ROOM CLEARED");
         Debug.Log("CNT: " + this.currentRoom.enemies.Count);
         if(this.currentRoom.enemies.Count <= 0) {
@@ -433,13 +429,18 @@ public class PlayerController : MonoBehaviour
     {
         this.gameController.GameOver();
     }
-    private void EnableTeleportsOnEmptyRoom()
+    private void EnableOrDistableTeleports()
     {
         if(this.currentRoom.enemies.Count <= 0)
         {
             this.enableTeleports = true;
-            SetProperTeleportSprites();
         }
+        else
+        {
+            this.enableTeleports = false;
+
+        }
+        SetProperTeleportSprites();
     }
 
     public void PickUpCoin()
@@ -642,4 +643,103 @@ public class PlayerController : MonoBehaviour
         this.enabledNextLevelTeleport = true;
     }
 
+    public AdditionalPlayerData GetAdditionalPlayerData()
+    {
+        return new AdditionalPlayerData(
+                this.playerCurrentHealth,
+                this.playerMaxHealth,
+                this.moneyAmount,
+                this.ownedHpPotions,
+                this.ownedStars,
+                new List<float>
+                {
+                    this.gameObject.transform.position.x,
+                    this.gameObject.transform.position.y,
+                    this.gameObject.transform.position.z
+                },
+                this.currentRoom.Id
+            );
+    }
+
+    public void SetAdditionalPlayerData(AdditionalPlayerData playerData)
+    {
+        this.playerCurrentHealth = playerData.currentHp;
+        this.playerMaxHealth = playerData.maxHp;
+        this.moneyAmount = playerData.coinsAmount;
+        this.ownedHpPotions = playerData.collectedHpPotions;
+        this.ownedStars = playerData.collectedStars;
+        this.currentRoom = roomInfo[playerData.currentActiveRoom];
+        this.gameObject.transform.position = new Vector3(
+            playerData.playerLocation[0],
+            playerData.playerLocation[1],
+            playerData.playerLocation[2]
+            );
+        SetSlider((float)this.playerCurrentHealth / this.playerMaxHealth);
+        EnableEnemiesInRoom();
+    }
+
+    public EnemiesStateData GetEnemiesStateData()
+    {
+        List<int> enemiesIds = new List<int>();
+        List<int> enemiesHps = new List<int>();
+        List<List<float>> enemiesLocations = new List<List<float>>();
+
+        foreach(Room room in roomInfo.Values)
+        {
+            foreach(GameObject eObject in room.enemies)
+            {
+                Enemy e = eObject.GetComponent<Enemy>();
+                if (e.GetEnemyCurrentHP() == 0) continue;
+                enemiesIds.Add(e.enemyID);
+                enemiesHps.Add(e.GetEnemyCurrentHP());
+                enemiesLocations.Add(new List<float>
+                {
+                    eObject.transform.position.x,
+                    eObject.transform.position.y,
+                    eObject.transform.position.z
+                });
+            }
+        }
+        return new EnemiesStateData(
+            enemiesIds,
+            enemiesHps,
+            enemiesLocations,
+            this.gameController.enemiesTracker.GetStartEnemiesAmount(),
+            this.gameController.enemiesTracker.GetAliveEnemiesAmount(),
+            this.gameController.enemiesTracker.GetDeadEnemiesAmount()
+            );
+    }
+
+    public void SetEnemiesStateData(EnemiesStateData enemiesData)
+    {
+        foreach (Room room in roomInfo.Values)
+        {
+            foreach (GameObject eObject in room.enemies)
+            {
+                Enemy e = eObject.GetComponent<Enemy>();
+                int currentEnemyIndex = enemiesData.enemiesIds.IndexOf(e.enemyID);
+                if(currentEnemyIndex != -1 && enemiesData.enemiesLocations.Count > currentEnemyIndex)
+                {
+                    eObject.transform.position = new Vector3(
+                        enemiesData.enemiesLocations[currentEnemyIndex][0],
+                        enemiesData.enemiesLocations[currentEnemyIndex][1],
+                        enemiesData.enemiesLocations[currentEnemyIndex][2]
+                    );
+                    e.SetEnemyCurrentHP(enemiesData.enemiesHps[currentEnemyIndex]);
+                    e.MarkEnemyAsReadFromSave();
+                }
+            }
+        }
+        EnemiesTracker savedEnemiesTracker = new EnemiesTracker();
+        savedEnemiesTracker.SetAliveEnemiesAmount(enemiesData.aliveEnemiesAmount);
+        savedEnemiesTracker.SetStartEnemiesAmount(enemiesData.startEnemiesAmount);
+        savedEnemiesTracker.SetDeadEnemiesAmount(enemiesData.deadEnemiesAmount);
+
+        this.gameController.enemiesTracker = savedEnemiesTracker;
+    }
+
+    public void DetermineIfRoomTeleportsShallBeOpen()
+    {
+        EnableOrDistableTeleports();
+    }
 }

@@ -7,9 +7,22 @@ public class Coin : MonoBehaviour
 {
     public int coinID;
 
+    public bool isFromTreasure = false;
+    public GameObject treasureReferance = null;
+    public int pickUpEntityID;
+    private void OnDestroy()
+    {
+        if (this.isFromTreasure && this.treasureReferance != null)
+        {
+            Treasure treasure = treasureReferance.GetComponent<Treasure>();
+            treasure.droppedItems.Remove(this.gameObject);
+        }
+    }
     private void Awake()
     {
         SetCoinID(GenerationEntityIDController.currentCoinID);
+        this.pickUpEntityID = GenerationEntityIDController.pickUpEntityID;
+        GenerationEntityIDController.pickUpEntityID += 1;
     }
     public void ControlTheCoinDrop()
     {

@@ -13,6 +13,25 @@ public abstract class Item : MonoBehaviour
     public float attackRange;
     public float movementSpeed;
 
+    public int pickUpEntityID;
+
+    public bool isFromTreasure = false;
+    public GameObject treasureReferance = null;
+
+    private void Awake()
+    {
+        this.pickUpEntityID = GenerationEntityIDController.pickUpEntityID;
+        GenerationEntityIDController.pickUpEntityID += 1;
+    }
+
+    private void OnDestroy()
+    {
+        if(this.isFromTreasure && this.treasureReferance != null)
+        {
+            Treasure treasure = treasureReferance.GetComponent<Treasure>();
+            treasure.droppedItems.Remove(this.gameObject);
+        }
+    }
     public void ControlTheItemDrop()
     {
         Invoke("FreezeItemTransition", 2f);

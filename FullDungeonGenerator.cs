@@ -59,6 +59,8 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         {
             Debug.Log("PROBA GENERACJI Z ZAPISANEGO STATE");
             this.loadedData = SaveSystem.LoadData();
+            GameController.gameFromSave = true;
+
             UnityEngine.Random.state = this.loadedData.gameState;
             Debug.Log("PO GENERACJI DANE ENEMY:" + this.loadedData.slainEnemyIDs.Count);
             Debug.Log("PO GENERACJI DANE COIN:" + this.loadedData.collectedCoinIDs.Count);
@@ -87,8 +89,12 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
             /*UnityEngine.Random.state = testState;*/
             SaveSystem.gameState = UnityEngine.Random.state;
             finalizedRooms = new Dictionary<int, Room>();
+            treasures = new List<GameObject>();
+            enemies = new List<GameObject>();
+            coins = new List<GameObject>();
+            entrances = new List<GameObject>();
+            exits = new List<GameObject>();
             int oldInstantiatedObjectsAmount = this.instantiatedDungeonObjects.transform.childCount;
-
             for(int i = 0; i < oldInstantiatedObjectsAmount; i++)
             {
                 Destroy(this.instantiatedDungeonObjects.transform.GetChild(i).gameObject);
@@ -622,6 +628,16 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         {
             Destroy(this.instantiatedDungeonObjects.transform.GetChild(i).gameObject);
         }
+    }
+
+    public SaveData GetLoadedDataFromSave()
+    {
+        return this.loadedData;
+    }
+
+    public List<GameObject> GetTreasures()
+    {
+        return this.treasures;
     }
 
 }

@@ -3,16 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class PlayerStats : CommonStats
+[System.Serializable]
+public class PlayerStats
 {
+    public int healthPoints;
+    public int toughness;
+    public int attackDamage;
+    public float attackSpeed;
+    public float attackRange;
+    public float movementSpeed;
 
     public PlayerStats( int healthPoints,
                         int toughness,
                         int attackDamage,
                         float attackSpeed,
                         float attackRange,
-                        float movementSpeed,
-                        AttackType attackType)
+                        float movementSpeed)
     {
         this.healthPoints = healthPoints;
         this.toughness = toughness;
@@ -20,7 +26,6 @@ public class PlayerStats : CommonStats
         this.attackSpeed = attackSpeed;
         this.attackRange = attackRange;
         this.movementSpeed = movementSpeed;
-        this.attackType = attackType;
     }
 
 }

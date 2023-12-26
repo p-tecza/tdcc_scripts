@@ -11,5 +11,4 @@ public class CommonStats
     public float attackSpeed { get; set; }
     public float attackRange { get; set; }
     public float movementSpeed { get; set; }
-    public AttackType attackType { get; set; }
 }

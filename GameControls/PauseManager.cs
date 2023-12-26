@@ -6,7 +6,10 @@ public class PauseManager : MonoBehaviour
 {
     public GameObject pauseWindow;
     public static PauseManager instance;
-
+    [SerializeField]
+    private PlayerController playerController;
+    [SerializeField]
+    private GameController gameController;
     private void Awake()
     {
         instance = this;
@@ -26,12 +29,23 @@ public class PauseManager : MonoBehaviour
 
     public void SaveAndReturnToMainMenu()
     {
-        Debug.Log("TODO ZAPISYWANIE!!!");
         SaveData data = new SaveData(
             SaveSystem.gameState,
             ProgressHolder.collectedCoinIDs,
-            ProgressHolder.slainEnemyIDs
+            ProgressHolder.slainEnemyIDs,
+            this.playerController.stats,
+            this.playerController.GetAdditionalPlayerData(),
+            this.playerController.GetEnemiesStateData(),
+            ProgressHolder.openedTreasuresSequence,
+            this.gameController.GetTreasureStateData()
             );
+        Debug.Log("CURRENT SEQUENCE OF OPEN: ");
+
+        foreach(int i in ProgressHolder.openedTreasuresSequence)
+        {
+            Debug.Log(i);
+        }
+
         SaveSystem.SaveData(data);
         GameSceneManager.instance.LoadMainMenuScene();
     }

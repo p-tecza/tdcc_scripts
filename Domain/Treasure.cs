@@ -6,6 +6,8 @@ using UnityEngine.UIElements;
 public class Treasure : MonoBehaviour
 {
     [SerializeField]
+    private Transform instantiatedDungeonObjects;
+    [SerializeField]
     public List<GameObject> possibleTreasures;
     [SerializeField]
     private Sprite openChestSprite;
@@ -25,8 +27,14 @@ public class Treasure : MonoBehaviour
 
     private GameObject contains;
 
+    public int treasureID;
+    public bool isOpened = false;
+    public List<GameObject> droppedItems = new List<GameObject>();
+
     internal void SetContent(Dictionary<string, int> treasureContent)
     {
+        this.treasureID = GenerationEntityIDController.treasureID;
+        GenerationEntityIDController.treasureID += 1;
         this.mainItemId = treasureContent["item"];
         GameController.RemoveItemFromAvailableSpecificItemLoot(this.mainItemId);
         this.additionalItems = new Dictionary<string, int>()
@@ -38,10 +46,13 @@ public class Treasure : MonoBehaviour
         contains = possibleTreasures[this.mainItemId];
     }
 
-    public void DropItems(Transform playerCurrentPosition)
+    public void DropItems(Transform playerCurrentPosition, bool useForSave)
     {
         Debug.Log("KOLIZJA ZE SKRZYNKA");
         Debug.Log(StringOfTreasureContent());
+
+        if(!useForSave)
+        ProgressHolder.openedTreasuresSequence.Add(this.treasureID);
 
         if(this.additionalItems["hpPots"] != 0)
         {
@@ -56,7 +67,11 @@ public class Treasure : MonoBehaviour
                 GameObject hpPotion = Instantiate(this.healthPotion, fixedObjectRespawn, Quaternion.identity);
                 hpPotion.GetComponent<Rigidbody2D>().AddForce(thrustVector * thrustForce, ForceMode2D.Impulse);
                 hpPotion.GetComponent<HpPotion>().ControlTheCollectableDrop();
+                hpPotion.GetComponent<HpPotion>().isFromTreasure = true;
+                hpPotion.GetComponent<HpPotion>().treasureReferance = this.gameObject;
                 this.gameController.AddNewHint(fixedObjectRespawn, hpPotion);
+                droppedItems.Add(hpPotion);
+                hpPotion.transform.SetParent(this.instantiatedDungeonObjects, true);
             }
         }
 
@@ -73,6 +88,10 @@ public class Treasure : MonoBehaviour
                 GameObject coinObject = Instantiate(this.coin, fixedObjectRespawn, Quaternion.identity);
                 coinObject.GetComponent<Rigidbody2D>().AddForce(thrustVector * thrustForce, ForceMode2D.Impulse);
                 coinObject.GetComponent<Coin>().ControlTheCoinDrop();
+                coinObject.GetComponent<Coin>().isFromTreasure = true;
+                coinObject.GetComponent<Coin>().treasureReferance = this.gameObject;
+                droppedItems.Add(coinObject);
+                coinObject.transform.SetParent(this.instantiatedDungeonObjects, true);
             }
         }
 
@@ -89,7 +108,11 @@ public class Treasure : MonoBehaviour
                 GameObject starObject = Instantiate(this.star, fixedObjectRespawn, Quaternion.identity);
                 starObject.GetComponent<Rigidbody2D>().AddForce(thrustVector * thrustForce, ForceMode2D.Impulse);
                 starObject.GetComponent<Star>().ControlTheCollectableDrop();
+                starObject.GetComponent<Star>().isFromTreasure = true;
+                starObject.GetComponent<Star>().treasureReferance = this.gameObject;
                 this.gameController.AddNewHint(fixedObjectRespawn, starObject);
+                droppedItems.Add(starObject);
+                starObject.transform.SetParent(this.instantiatedDungeonObjects, true);
             }
         }
 
@@ -104,10 +127,14 @@ public class Treasure : MonoBehaviour
             GameObject containedItemObject = Instantiate(this.contains, fixedObjectRespawn, Quaternion.identity);
             containedItemObject.GetComponent<Rigidbody2D>().AddForce(thrustVector * thrustForce, ForceMode2D.Impulse);
             containedItemObject.GetComponent<Item>().ControlTheItemDrop();
+            containedItemObject.GetComponent<Item>().isFromTreasure = true;
+            containedItemObject.GetComponent<Item>().treasureReferance = this.gameObject;
             this.gameController.AddNewHint(fixedObjectRespawn, containedItemObject);
+            droppedItems.Add(containedItemObject);
+            containedItemObject.transform.SetParent(this.instantiatedDungeonObjects, true);
         }
 
-
+        this.isOpened = true;
         Invoke("DisableTreasureBoxCollider", 0.25f);
         this.GetComponent<SpriteRenderer>().sprite = this.openChestSprite;
     }
@@ -123,6 +150,12 @@ public class Treasure : MonoBehaviour
     private void DisableTreasureBoxCollider()
     {
         this.GetComponent<BoxCollider2D>().enabled = false;
+    }
+
+    public void SetAlreadyLootedTreasureFromSave()
+    {
+        this.GetComponent<SpriteRenderer>().sprite = this.openChestSprite;
+        DisableTreasureBoxCollider();
     }
 
 }

@@ -45,8 +45,14 @@ public class BasicEnemy : Enemy
     }
     void Start()
     {
-        
-        this.currentHealth = this.healthPoints;
+        if (this.isReadFromSave)
+        {
+            this.isReadFromSave = false;
+        }
+        else
+        {
+            this.currentHealth = this.healthPoints;
+        }
         BoxCollider2D enemyCollider = gameObject.GetComponent<BoxCollider2D>();
         this.colliderWidth = enemyCollider.size.x;
         this.colliderHeight = enemyCollider.size.y;

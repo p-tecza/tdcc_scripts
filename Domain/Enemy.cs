@@ -25,6 +25,7 @@ public abstract class Enemy : MonoBehaviour
     public float attackSpeed;
     public bool isActive = false;
 
+    protected bool isReadFromSave = false;
     public abstract void ActivateEnemy();
 
     public abstract void DeactivateEnemy();
@@ -75,6 +76,22 @@ public abstract class Enemy : MonoBehaviour
     public int GetEnemyID()
     {
         return this.enemyID;
+    }
+
+    public void SetEnemyCurrentHP(int newHpVal)
+    {
+        this.currentHealth = newHpVal;
+        SetSlider((float)this.currentHealth / this.healthPoints);
+    }
+
+    public void MarkEnemyAsReadFromSave()
+    {
+        this.isReadFromSave = true;
+    }
+
+    public int GetEnemyCurrentHP()
+    {
+        return this.currentHealth;
     }
 
 }
