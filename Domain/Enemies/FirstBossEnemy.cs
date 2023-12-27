@@ -148,6 +148,7 @@ public class FirstBossEnemy : Enemy
         ProgressHolder.slainEnemyIDs.Add(this.GetEnemyID());
         Invoke("AcknowledgeEnemyDeath", 1f);
         Invoke("OpenNextLevelTeleport", 1f);
+        base.RemoveRoomReference();
         Destroy(gameObject, this.destroyBodyAfterSeconds);
     }
 

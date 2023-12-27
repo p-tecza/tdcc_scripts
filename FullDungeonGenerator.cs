@@ -240,25 +240,11 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         List<GameObject> finalEnemies = new List<GameObject>();
         List<GameObject> finalCoins = new List<GameObject>();
 
-
-        foreach(int i in enemyIDsToDelete)
-        {
-            Debug.Log("TO DELETE ENEMY ID: " + i);
-        }
-
-        foreach(int i in coinIDsToDelete)
-        {
-            Debug.Log("TO DELETE COIN ID: " + i);
-        }
-
         foreach(GameObject enemyObject in this.enemies)
         {
 
-            Debug.Log("ENEMY ID: "+ enemyObject.GetComponent<Enemy>().GetEnemyID());
-
             if (enemyIDsToDelete.Contains(enemyObject.GetComponent<Enemy>().GetEnemyID()))
             {
-                Debug.Log("USUWAM enemy?!");
                 Destroy(enemyObject);
             }
             else
@@ -271,10 +257,8 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         foreach(GameObject coinObject in this.coins)
         {
 
-            Debug.Log("COIN ID: "+coinObject.GetComponent<Coin>().GetCoinID());
             if (coinIDsToDelete.Contains(coinObject.GetComponent<Coin>().GetCoinID()))
             {
-                Debug.Log("USUWAM coin?!");
                 Destroy(coinObject);
             }
             else

@@ -242,7 +242,7 @@ public class RangeEnemy : Enemy
         ProgressHolder.slainEnemyIDs.Add(this.GetEnemyID());
         this.gameController.UpdateQuestProgress();
         DropItem();
-        /*DropItem();*/
+        base.RemoveRoomReference();
         Invoke("AcknowledgeEnemyDeath", 1f);
         Destroy(gameObject, this.destroyBodyAfterSeconds);
     }

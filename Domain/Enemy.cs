@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 public abstract class Enemy : MonoBehaviour
 {
+    [SerializeField]
+    private PlayerController playerController;
     public int enemyID;
     protected GameObject enemyObject { get; set; }
     [SerializeField]
@@ -55,9 +57,7 @@ public abstract class Enemy : MonoBehaviour
     {
         if(this.heldItem != null)
         {
-            Debug.Log("DROPPING ITEM: " + this.heldItem.name);
             GameObject obj = Instantiate(this.heldItem, gameObject.transform.parent);
-            Debug.Log("INSTANTIATED OBJECT NAME: " + obj.name);
             obj.transform.position = this.gameObject.transform.position;
         }
     }
@@ -69,7 +69,6 @@ public abstract class Enemy : MonoBehaviour
 
     public void SetEnemyID(int enemyID)
     {
-        Debug.Log("SETTING ENEMY ID");
         this.enemyID = enemyID;
         GenerationEntityIDController.currentEnemyID += 1;
     }
@@ -92,6 +91,11 @@ public abstract class Enemy : MonoBehaviour
     public int GetEnemyCurrentHP()
     {
         return this.currentHealth;
+    }
+
+    protected void RemoveRoomReference()
+    {
+        this.playerController.RemoveReferenceFromHeldEnemiesInRoom(this.gameObject);
     }
 
 }

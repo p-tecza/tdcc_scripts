@@ -37,7 +37,9 @@ public class PauseManager : MonoBehaviour
             this.playerController.GetAdditionalPlayerData(),
             this.playerController.GetEnemiesStateData(),
             ProgressHolder.openedTreasuresSequence,
-            this.gameController.GetTreasureStateData()
+            this.gameController.GetTreasureStateData(),
+            this.gameController.GetRemainingShopItemIds(),
+            this.gameController.GetFullActiveQuestStateData()
             );
         Debug.Log("CURRENT SEQUENCE OF OPEN: ");
 

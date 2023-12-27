@@ -23,12 +23,16 @@ public class ShopRoomGenerator : MonoBehaviour
     private Treasure treasure;
     [SerializeField]
     private GameController gameController;
-    
+
+    public GameObject npcInShopRoom;
+    public List<GameObject> itemsInShopRoom;
+
 
     private TilemapVisualizer tilemapVisualizer;
 
     public Room GenerateShop(Room room, TilemapVisualizer tilemapVisualizer, GameObject parentObjectForInstantiated)
     {
+        this.itemsInShopRoom = new List<GameObject>();
         this.tilemapVisualizer = tilemapVisualizer;
 
         List<GameObject> treasureList = treasure.possibleTreasures;
@@ -46,6 +50,7 @@ public class ShopRoomGenerator : MonoBehaviour
             GameObject refNPCObject = Instantiate(npcObject, npcSpot, Quaternion.identity);
             refNPCObject.transform.SetParent(parentObjectForInstantiated.transform, true);
             refNPCObject.GetComponent<NPC>().SetNPCData(allNPCDialogData);
+            this.npcInShopRoom = refNPCObject;
         }
 
         Vector3 itemSpot = new Vector3(roomCenter.x + 0.5f, roomCenter.y + -1.5f, 0);
@@ -80,6 +85,7 @@ public class ShopRoomGenerator : MonoBehaviour
         instantiatedObject.tag = "ShopItem";
         InstantiatePriceOfItem(instantiatedObject, position, price);
         this.gameController.AddNewHint(position, instantiatedObject);
+        this.itemsInShopRoom.Add(instantiatedObject);
     }
 
     private void InstantiatePriceOfItem(GameObject itemInstantiated, Vector3 position, int price)
@@ -182,6 +188,11 @@ public class ShopRoomGenerator : MonoBehaviour
         return tilesToRepair;
     }
 
-
-
+    public void RemoveShopItemFromState(GameObject pickedUpShopObject)
+    {
+        if(this.itemsInShopRoom.Contains(pickedUpShopObject))
+        {
+            this.itemsInShopRoom.Remove(pickedUpShopObject);
+        }
+    }
 }

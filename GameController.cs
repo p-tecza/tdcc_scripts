@@ -54,6 +54,8 @@ public class GameController : MonoBehaviour
     private GameObject parentQuestItemsObject;
     [SerializeField]
     private BossRoomGenerator bossRoomGenerator;
+    [SerializeField]
+    private ShopRoomGenerator shopRoomGenerator;
 
     public static bool gameFromSave = false;
 
@@ -98,7 +100,33 @@ public class GameController : MonoBehaviour
         playerController.SetEnemiesStateData(saveData.enemiesStateData);
         playerController.DetermineIfRoomTeleportsShallBeOpen();
         FixAlreadyLootedTreasures(saveData.treasureStateData);
+        FixAlreadyPickedUpItemsFromShopRoom(saveData.remainingShopItemIds);
+        ApplyQuestStateFromSave(saveData.questStateData);
         gameFromSave = false;
+    }
+
+    private void FixAlreadyPickedUpItemsFromShopRoom(List<int> pickedUpShopItemIds)
+    {
+        List<GameObject> itemFromShop = this.shopRoomGenerator.itemsInShopRoom;
+        List<GameObject> toRemove = new List<GameObject>();
+
+        foreach(GameObject go in itemFromShop)
+        {
+            if (go != null)
+            {
+                int itemId = DetermineIdOfPickUpAbleObject(go);
+                if (!pickedUpShopItemIds.Contains(itemId))
+                {
+                    toRemove.Add(go);
+                }
+            }
+        }
+
+        foreach(GameObject go in toRemove)
+        {
+            this.shopRoomGenerator.RemoveShopItemFromState(go);
+            Destroy(go);
+        }
     }
 
     public void CreateNextDungeonLevel()
@@ -348,6 +376,9 @@ public class GameController : MonoBehaviour
                     int droppedItemIt = 0;
                     foreach(GameObject droppedItem in treasure.droppedItems)
                     {
+
+                        pickUpId = DetermineIdOfPickUpAbleObject(droppedItem);
+/*
                         if (droppedItem.GetComponent<Coin>() != null)
                         {
                             Coin coin = droppedItem.GetComponent<Coin>();
@@ -362,7 +393,7 @@ public class GameController : MonoBehaviour
                         {
                             Item item = droppedItem.GetComponent<Item>();
                             pickUpId = item.pickUpEntityID;
-                        }
+                        }*/
                         if(pickUpId != -1 && treasureStateData.droppedItemsIds.Count > currentTreasureIndex)
                         {
                             if (!treasureStateData.droppedItemsIds[currentTreasureIndex].Contains(pickUpId))
@@ -436,7 +467,8 @@ public class GameController : MonoBehaviour
             List<int> idsOfDroppedItemsOfThisTreasure = new List<int>();
             foreach(GameObject droppedItem in droppedItems)
             {
-                int pickUpId = -1;
+                int pickUpId = DetermineIdOfPickUpAbleObject(droppedItem);
+/*
                 if (droppedItem.GetComponent<Coin>() != null)
                 {
                     Coin coin = droppedItem.GetComponent<Coin>();
@@ -452,7 +484,7 @@ public class GameController : MonoBehaviour
                 {
                     Item item = droppedItem.GetComponent<Item>();
                     pickUpId = item.pickUpEntityID;
-                }
+                }*/
 
                 if(pickUpId != -1)
                 {
@@ -477,5 +509,55 @@ public class GameController : MonoBehaviour
                 cordsOfAllDroppedItems
             );
     }
+
+    public void RemoveShopItemFromStateOnPickUp(GameObject pickedUpShopObject)
+    {
+        this.shopRoomGenerator.RemoveShopItemFromState(pickedUpShopObject);
+    }
+
+    internal List<int> GetRemainingShopItemIds()
+    {
+        List<int> ids = new List<int>();
+
+        foreach(GameObject go in this.shopRoomGenerator.itemsInShopRoom)
+        {
+            ids.Add(DetermineIdOfPickUpAbleObject(go));
+        }
+        return ids;
+    }
+
+
+    private int DetermineIdOfPickUpAbleObject(GameObject go)
+    {
+        int pickUpId = -1;
+        if (go.GetComponent<Coin>() != null)
+        {
+            Coin coin = go.GetComponent<Coin>();
+            pickUpId = coin.pickUpEntityID;
+        }
+        else if (go.GetComponent<Collectable>() != null)
+        {
+            Collectable collectable = go.GetComponent<Collectable>();
+            pickUpId = collectable.pickUpEntityID;
+        }
+        else if (go.GetComponent<Item>() != null)
+        {
+            Item item = go.GetComponent<Item>();
+            pickUpId = item.pickUpEntityID;
+        }
+        return pickUpId;
+    }
+
+    public QuestStateData GetFullActiveQuestStateData()
+    {
+        return this.questController.GetFullQuestStateData();
+    }
+
+    public void ApplyQuestStateFromSave(QuestStateData data)
+    {
+        this.questController.SetQuestStateFromSave(data);
+        this.questController.UpdateQuestProgressFromSaveProgress(data.currentQuestProgress);
+    }
+
 
 }

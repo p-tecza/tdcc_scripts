@@ -298,6 +298,7 @@ public class PlayerController : MonoBehaviour
             }
             SetMoneyAmountAndUpdateUI(this.moneyAmount - ShopRoom.costs["hpPotion"]);
             PickUpCollectable(shopObject);
+            this.gameController.RemoveShopItemFromStateOnPickUp(shopObject);
             RemovePickedUpObject(shopObject);
         }
         else if(shopObjectName == "Star(Clone)")
@@ -308,6 +309,7 @@ public class PlayerController : MonoBehaviour
             }
             SetMoneyAmountAndUpdateUI(this.moneyAmount - ShopRoom.costs["star"]);
             PickUpCollectable(shopObject);
+            this.gameController.RemoveShopItemFromStateOnPickUp(shopObject);
             RemovePickedUpObject(shopObject);
         }
         else
@@ -318,6 +320,7 @@ public class PlayerController : MonoBehaviour
             }
             SetMoneyAmountAndUpdateUI(this.moneyAmount - ShopRoom.costs["item"]);
             PickUpItem(shopObject);
+            this.gameController.RemoveShopItemFromStateOnPickUp(shopObject);
             RemovePickedUpObject(shopObject);
         }
     }
@@ -741,5 +744,22 @@ public class PlayerController : MonoBehaviour
     public void DetermineIfRoomTeleportsShallBeOpen()
     {
         EnableOrDistableTeleports();
+    }
+
+    internal void RemoveReferenceFromHeldEnemiesInRoom(GameObject gameObject)
+    {
+        Debug.Log("TRYING TO REMOVE REF");
+        foreach(Room room in roomInfo.Values)
+        {
+            foreach(GameObject eObject in room.enemies)
+            {
+                if (eObject == gameObject)
+                {
+                    Debug.Log("REMOVING REF");
+                    room.enemies.Remove(gameObject);
+                    break;
+                }
+            }
+        }
     }
 }

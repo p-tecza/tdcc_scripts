@@ -12,9 +12,12 @@ public class SaveData {
     public EnemiesStateData enemiesStateData;
     public List<int> openedTreasuresSequence;
     public TreasureStateData treasureStateData;
+    public List<int> remainingShopItemIds;
+    public QuestStateData questStateData;
     public SaveData(UnityEngine.Random.State gameState, List<int> collectedCoinIDs, List<int> slainEnemyIDs,
         PlayerStats playerStats, AdditionalPlayerData additionalPlayerData, EnemiesStateData enemiesStateData,
-        List<int> openedTreasuresSequence, TreasureStateData treasureStateData)
+        List<int> openedTreasuresSequence, TreasureStateData treasureStateData, List<int> pickedUpShopItemIds,
+        QuestStateData questStateData)
     {
         this.gameState = gameState;
         this.collectedCoinIDs = collectedCoinIDs;
@@ -24,8 +27,8 @@ public class SaveData {
         this.enemiesStateData = enemiesStateData;
         this.openedTreasuresSequence = openedTreasuresSequence;
         this.treasureStateData = treasureStateData;
-        Debug.Log("SIZE OF COLLECTED COINS: " + this.collectedCoinIDs.Count);
-        Debug.Log("SIZE OF SLAIN ENEMIES: " + this.slainEnemyIDs.Count);
+        this.remainingShopItemIds = pickedUpShopItemIds;
+        this.questStateData = questStateData;
     }
 
 }

@@ -87,6 +87,7 @@ public class QuestController : MonoBehaviour
         return 0;
     }
 
+    //TODO NAPRAW TE QUESTY PRZY SAVE
     public int DetermineQuestCurrentProgress()
     {
         if(this.isQuestActive && this.currentQuestData != null && !isQuestCompleted)
@@ -125,6 +126,16 @@ public class QuestController : MonoBehaviour
         UpdateQuestInfoProgressWindow();
     }
 
+    public void UpdateQuestProgressFromSaveProgress(int progressFromSave)
+    {
+        this.currentQuestProgress = progressFromSave;
+        if (CheckIfQuestIsCompleted())
+        {
+            this.isQuestCompleted = true;
+            this.currentQuestProgress = this.questProgressThreshold;
+        }
+        UpdateQuestInfoProgressWindow();
+    }
     private bool CheckIfQuestIsCompleted()
     {
         return this.currentQuestProgress >= this.questProgressThreshold;
@@ -229,6 +240,23 @@ public class QuestController : MonoBehaviour
     {
         this.isQuestCompleted = false;
         this.isQuestActive = false;
+    }
+
+    public QuestStateData GetFullQuestStateData()
+    {
+        return new QuestStateData(
+                this.isQuestCompleted,
+                this.isQuestActive,
+                this.currentQuestData,
+                this.currentQuestProgress
+            );
+    }
+
+    public void SetQuestStateFromSave(QuestStateData data)
+    {
+        this.isQuestActive = data.isQuestPickedUp;
+        this.isQuestCompleted = data.isQuestCompleted;
+        this.currentQuestData = data.questData;
     }
 
 }
