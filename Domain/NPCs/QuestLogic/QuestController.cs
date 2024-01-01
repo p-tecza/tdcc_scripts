@@ -239,6 +239,7 @@ public class QuestController : MonoBehaviour
     {
         this.isQuestCompleted = false;
         this.isQuestActive = false;
+        this.currentQuestProgress = 0;
     }
 
     public QuestStateData GetFullQuestStateData()

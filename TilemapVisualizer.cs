@@ -108,6 +108,24 @@ public class TilemapVisualizer : MonoBehaviour
         }
     }
 
+    public void RepairRoomWallsAndTiles(HashSet<Vector2Int> roomTiles, bool isRoomComplex)
+    {
+        foreach(Vector2Int tile in roomTiles)
+        {
+            Vector3Int tilePosition = new Vector3Int(tile.x, tile.y, 0);
+            wallTilemap.SetTile(tilePosition, null);
+        }
+        PaintFloorTiles(roomTiles, isRoomComplex);
+    }
+    public void GenerateFloorTilesInGivenLocations(HashSet<Vector2Int> floorPositions, bool isComplex)
+    {
+        foreach (Vector2Int tile in floorPositions)
+        {
+            Vector3Int tilePosition = new Vector3Int(tile.x, tile.y, 0);
+            wallTilemap.SetTile(tilePosition, null);
+        }
 
+        PaintFloorTiles(floorPositions, isComplex);
+    }
 
 }

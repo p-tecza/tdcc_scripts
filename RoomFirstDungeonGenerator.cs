@@ -60,6 +60,50 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
         return base.CreateSeperateRoomTiles(swStartPosition);
     }
 
+    public (HashSet<Vector2Int>, HashSet<Vector2Int>) CreateGoodFloorWithoutWallTiles(HashSet<Vector2Int> wallTiles, HashSet<Vector2Int> floorTiles, bool complex)
+    {
+        HashSet<Vector2Int> newFloor = new HashSet<Vector2Int>(floorTiles);
+        HashSet<Vector2Int> newWalls = new HashSet<Vector2Int>();
+        List<Vector2Int> directions = new List<Vector2Int>
+        {
+            new Vector2Int(1,1),
+            new Vector2Int(1,0),
+            new Vector2Int(1,-1),
+            new Vector2Int(0,1),
+            new Vector2Int(0,-1),
+            new Vector2Int(-1,-1),
+            new Vector2Int(-1,0),
+            new Vector2Int(-1,1)
+        };
+
+        foreach(Vector2Int wallTile in wallTiles)
+        {
+            bool toOverride = true;
+            foreach(Vector2Int dir in directions)
+            {
+                Vector2Int searchVec = wallTile + dir;
+                if(!wallTiles.Contains(searchVec) && !floorTiles.Contains(searchVec))
+                {
+                    toOverride = false;
+                    break;
+                }
+            }
+            if(toOverride)
+            {
+                Debug.Log("DO NAPRAWY");
+                newFloor.Add(wallTile);
+            }
+            else
+            {
+                newWalls.Add(wallTile);
+            }
+        }
+
+        tilemapVisualizer.RepairRoomWallsAndTiles(newFloor, complex);
+
+        return (newWalls, newFloor);
+    }
+
     protected Dictionary<Vector2Int, HashSet<Vector2Int>> RunBSPGeneration()
     {
         List<BoundsInt> roomList = CreateRooms();

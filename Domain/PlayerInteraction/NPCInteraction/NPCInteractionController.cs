@@ -24,7 +24,10 @@ public class NPCInteractionController : MonoBehaviour
     {
         if (interactionWindowObject.activeSelf)
         {
-            if(procBy!=null && !CheckIfPlayerStillInRange(playerObject, procBy))
+
+            /*Debug.Log("PROC BY: " + procBy);*/
+
+            if (procBy!=null && !CheckIfPlayerStillInRange(playerObject, procBy))
             {
                 DisableInteractionWindow();
             }
@@ -46,6 +49,8 @@ public class NPCInteractionController : MonoBehaviour
         {
             QuestData currentQuestData = this.questController.GetCurrentQuestData();
             this.SetQuestContentForInteractionWindowDescription(currentQuestData);
+            this.procBy = procBy;
+            procBy.GetComponent<NPC>().SetOnClicksButtons();
             this.interactionWindowObject.SetActive(true);
             return;
         }
@@ -176,14 +181,6 @@ public class NPCInteractionController : MonoBehaviour
                 this.interactionProgressCnt = 1;
             }
         }
-/*        else if(currentQuestState == QuestState.SOLVED)
-        {
-            *//*TMP_Text dialog = interactionWindowObject.transform.Find("InteractionContent").Find("InteractionText").GetComponent<TMP_Text>();*//*
-            string questPhrase, option;
-            (questPhrase, option) = this.questController.GetStateDataOfQuestForInteractionWindow();
-            dialog.text = questPhrase;
-            SetQuestOption(option);
-        }*/
     }
 
     private void SetQuestOption(string option)
@@ -322,6 +319,10 @@ public class NPCInteractionController : MonoBehaviour
             else if (npcType == "Astray")
             {
                 QuestState currentQuestState = this.questController.GetQuestState();
+
+                Debug.Log("CURRENT QUEST STATE: " + currentQuestState);
+                Debug.Log("optionNumber: " + optionNumber);
+
                 switch (optionNumber) 
                 {
                     case 1:

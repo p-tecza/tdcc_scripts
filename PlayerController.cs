@@ -184,6 +184,16 @@ public class PlayerController : MonoBehaviour
             this.SmiteAllEnemies_ADMIN();
         }
 
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            this.TeleportToBossRoom_ADMIN();
+        }
+
+        if(Input.GetKeyDown(KeyCode.H))
+        {
+            this.TeleportToShopRoom_ADMIN();
+        }
+
     }
 
 /*    private void OnCollisionExit2D(Collision2D collision)
@@ -636,6 +646,20 @@ public class PlayerController : MonoBehaviour
             return;
 
         Gizmos.DrawWireSphere(playerInteractionPoint.position, this.playerInteractionRange);
+    }
+
+    private void TeleportToBossRoom_ADMIN()
+    {
+        int bossRoomID = this.gameController.GetBossRoomID();
+        Vector2Int loc = this.roomInfo[bossRoomID].teleports[0].teleportTo;
+        this.gameObject.transform.position = new Vector3(loc.x, loc.y, 0);
+    }
+
+    private void TeleportToShopRoom_ADMIN()
+    {
+        int shopRoomID = this.gameController.GetShopRoomID();
+        Vector2Int loc = this.roomInfo[shopRoomID].teleports[0].teleportTo;
+        this.gameObject.transform.position = new Vector3(loc.x, loc.y, 0);
     }
 
     private void SmiteAllEnemies_ADMIN()

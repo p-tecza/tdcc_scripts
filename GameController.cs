@@ -175,6 +175,8 @@ public class GameController : MonoBehaviour
         playerObject.transform.position = startPosition;
         mainCamera.transform.position = startPosition;
         this.ResetQuestsOnNextDungeonLevel();
+        this.enemiesTracker = new EnemiesTracker();
+        InitEnemiesTracker();
         playerController.SetUpCharacterForNextDungeonLevel();
     }
 
@@ -328,8 +330,10 @@ public class GameController : MonoBehaviour
 
     public void InsertItemToRandomEnemyInRandomRoom(string itemName)
     {
+        Debug.Log("INSERTING TO RANDOM ENEMY");
         if(CheckIfQuestItemIsAlreadyInGame(itemName))
         {
+            Debug.Log("IS ALREADY IN GAME!");
             return;
         }
         QuestItemData questItemData = this.itemRepository.GetQuestItemByName(itemName);
@@ -341,6 +345,7 @@ public class GameController : MonoBehaviour
         if (rooms[pickedRoom].enemies.Count > 0)
         {
             rooms[pickedRoom].enemies[0].GetComponent<Enemy>().SetHeldItem(questItemObject);
+            Debug.Log("PRZYPISANIE ITEMA DO ENEMY: " + rooms[pickedRoom].enemies[0].GetComponent<Enemy>().GetEnemyID());
         }
         else
         {
@@ -349,6 +354,7 @@ public class GameController : MonoBehaviour
                 if (room.enemies.Count > 0)
                 {
                     room.enemies[0].GetComponent<Enemy>().SetHeldItem(questItemObject);
+                    Debug.Log("PRZYPISANIE ITEMA DO ENEMY: " + room.enemies[0].GetComponent<Enemy>().GetEnemyID());
                     break;
                 }
             }
@@ -361,6 +367,7 @@ public class GameController : MonoBehaviour
         List<string> playerQuestItems = this.playerController.GetOwnedQuestItems();
         if (playerQuestItems.Contains(itemName))
         {
+            Debug.Log("ITEM IS ALREADY IN GAME!");
             return true;
         }
         
@@ -628,4 +635,13 @@ public class GameController : MonoBehaviour
         return data;
     }
 
+    public int GetBossRoomID()
+    {
+        return this.dungeonGenerator.GetBossRoomID();
+    }
+
+    public int GetShopRoomID()
+    {
+        return this.dungeonGenerator.GetShopRoomID();
+    }
 }

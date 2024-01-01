@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,8 +12,8 @@ public class AstrayNPC : NPC
         {
             return;
         }
-
-
+        Debug.Log("ASTRAY");
+        UnityEngine.Random.state = SaveSystem.gameState;
         base.Start();
         List<QuestData> list = new List<QuestData>();
         list.AddRange(this.gameController.questRepository.GetQuestsByNpc("Astray"));

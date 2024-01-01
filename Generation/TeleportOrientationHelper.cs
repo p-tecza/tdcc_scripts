@@ -64,6 +64,15 @@ public class TeleportOrientationHelper
                 chosenIndex = chosenIndex + randomOffset;
             }
         }
+        Debug.Log("RELATIVE LOCAITON: " + relativeLocation);
+        Debug.Log("AVAILABLE TILES COUNT: "+availableTiles.Count);
+        Debug.Log("CHOSEN INDEX PRE EXCEPTION: " + chosenIndex);
+
+        if(chosenIndex < 0 || chosenIndex >= availableTiles.Count)
+        {
+            Debug.Log("PROBLEM!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            /*return new Vector2Int(0, 0);*/
+        }
 
         return availableTiles[chosenIndex];
     }
@@ -90,9 +99,9 @@ public class TeleportOrientationHelper
         foreach (Vector2Int tile in tiles)
         {
             if(tile.x == minX) eastTiles.Add(tile);
-            else if(tile.x == maxX) westTiles.Add(tile);
-            else if(tile.y == minY) southTiles.Add(tile);
-            else if(tile.y == maxY) northTiles.Add(tile);
+            if(tile.x == maxX) westTiles.Add(tile);
+            if(tile.y == minY) southTiles.Add(tile);
+            if(tile.y == maxY) northTiles.Add(tile);
         }
 
         return new Dictionary<RelativeDirection, List<Vector2Int>>()
