@@ -14,10 +14,11 @@ public class Necklace : QuestItem
         Debug.Log("NECKLACE: TWORZE SIE");
         
     }
-    public void OnDestroy()
+/*    public void OnDestroy()
     {
         Debug.Log("NECKLACE: NISZCZE SIE");
-    }
+        base.OnDestroy();
+    }*/
 
 
 

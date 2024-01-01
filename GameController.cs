@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -23,6 +24,9 @@ public class GameController : MonoBehaviour
 
     [SerializeField]
     private QuestController questController;
+
+    [SerializeField]
+    private GameObjectGenerator gameObjectGenerator;
 
     public TMP_Text tmpCoinsAmount;
     public TMP_Text playerToughness;
@@ -59,10 +63,10 @@ public class GameController : MonoBehaviour
 
     public static bool gameFromSave = false;
 
-/*    private void Awake()
-    {
-        DontDestroyOnLoad(this.gameObject);
-    }*/
+    /*    private void Awake()
+        {
+            DontDestroyOnLoad(this.gameObject);
+        }*/
 
     // Start is called before the first frame update
     void Start()
@@ -101,8 +105,40 @@ public class GameController : MonoBehaviour
         playerController.DetermineIfRoomTeleportsShallBeOpen();
         FixAlreadyLootedTreasures(saveData.treasureStateData);
         FixAlreadyPickedUpItemsFromShopRoom(saveData.remainingShopItemIds);
+        SetOwnedQuestItems(saveData.heldQuestItems);
         ApplyQuestStateFromSave(saveData.questStateData);
+        DropItemsLayingOnTheGround(saveData.droppedQuestItemData);
         gameFromSave = false;
+    }
+
+    private void SetOwnedQuestItems(List<string> heldQuestItems)
+    {
+        this.playerController.SetOwnedQuestItemsFromSave(heldQuestItems);
+    }
+
+    private void DropItemsLayingOnTheGround(List<DroppedQuestItemStateData> droppedQuestItemData)
+    {
+        foreach(DroppedQuestItemStateData item in droppedQuestItemData)
+        {
+            GameObject instantiatedObj = this.gameObjectGenerator.GenerateEntity(item.itemName);
+            QuestItem questItem = instantiatedObj.GetComponent<QuestItem>();
+            if (questItem != null)
+            {
+                questItem.idOfRoom = item.roomId;
+                instantiatedObj.transform.position = new Vector3
+                (
+                    item.location[0],
+                    item.location[1],
+                    item.location[2]
+                );
+                List<Room> rooms = FullDungeonGenerator.GetFinalizedRooms().Values.ToList();
+                if (rooms.Count > item.roomId)
+                {
+                    Room consideredRoom = FullDungeonGenerator.GetFinalizedRooms()[item.roomId];
+                    consideredRoom.droppedItemsInRoom.Add(instantiatedObj);
+                }
+            }
+        }
     }
 
     private void FixAlreadyPickedUpItemsFromShopRoom(List<int> pickedUpShopItemIds)
@@ -110,7 +146,7 @@ public class GameController : MonoBehaviour
         List<GameObject> itemFromShop = this.shopRoomGenerator.itemsInShopRoom;
         List<GameObject> toRemove = new List<GameObject>();
 
-        foreach(GameObject go in itemFromShop)
+        foreach (GameObject go in itemFromShop)
         {
             if (go != null)
             {
@@ -122,7 +158,7 @@ public class GameController : MonoBehaviour
             }
         }
 
-        foreach(GameObject go in toRemove)
+        foreach (GameObject go in toRemove)
         {
             this.shopRoomGenerator.RemoveShopItemFromState(go);
             Destroy(go);
@@ -145,7 +181,7 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        mainCamera.transform.position = 
+        mainCamera.transform.position =
             new Vector3(playerObject.transform.position.x, playerObject.transform.position.y, -cameraZoom);
     }
 
@@ -195,7 +231,7 @@ public class GameController : MonoBehaviour
         GameObject newCanvasObject = Instantiate(this.hintCanvas.gameObject, finalHintPosition, Quaternion.identity);
         TMP_Text hintText = newCanvasObject.transform.Find("HintObject").Find("HintText").GetComponent<TMP_Text>();
         hintText.text = ItemHelper.GetNameOfItem(gameObject.name);
-        
+
 
         newCanvasObject.transform.SetParent(gameObject.transform, true);
     }
@@ -205,7 +241,7 @@ public class GameController : MonoBehaviour
     {
         this.hintsVisible = !this.hintsVisible;
         GameObject[] hintObjects = GameObject.FindGameObjectsWithTag("Hint");
-        for (int i = 0; i < hintObjects.Length; i++) 
+        for (int i = 0; i < hintObjects.Length; i++)
         {
             GameObject currentHintCanvas = hintObjects[i];
             int hintCanvChildCount = currentHintCanvas.transform.childCount;
@@ -246,7 +282,7 @@ public class GameController : MonoBehaviour
 
     public AllItemsData GetAllItemsData()
     {
-        return new AllItemsData(this.itemRepository.GetAllCollectables(),this.itemRepository.GetAllItems(), this.itemRepository.GetAllQuestItems());
+        return new AllItemsData(this.itemRepository.GetAllCollectables(), this.itemRepository.GetAllItems(), this.itemRepository.GetAllQuestItems());
     }
 
     private void InitializeRepositories()
@@ -279,7 +315,7 @@ public class GameController : MonoBehaviour
         return this.enemiesTracker.GetDeadEnemiesAmount();
     }
 
-    public List<QuestItem> GetListOfPlayerOwnedQuestItems()
+    public List<string> GetListOfPlayerOwnedQuestItems()
     {
         return this.playerController.GetOwnedQuestItems();
     }
@@ -292,10 +328,14 @@ public class GameController : MonoBehaviour
 
     public void InsertItemToRandomEnemyInRandomRoom(string itemName)
     {
+        if(CheckIfQuestItemIsAlreadyInGame(itemName))
+        {
+            return;
+        }
         QuestItemData questItemData = this.itemRepository.GetQuestItemByName(itemName);
         GameObject questItemObject = this.parentQuestItemsObject.transform.Find(questItemData.name).gameObject;
         Debug.Log("QUEST ITEM OBJECT: " + questItemObject.name);
-        Dictionary<int,Room> rooms = FullDungeonGenerator.GetFinalizedRooms();
+        Dictionary<int, Room> rooms = FullDungeonGenerator.GetFinalizedRooms();
         int pickedRoom = UnityEngine.Random.Range(0, rooms.Count);
 
         if (rooms[pickedRoom].enemies.Count > 0)
@@ -304,9 +344,9 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            foreach(Room room in rooms.Values)
+            foreach (Room room in rooms.Values)
             {
-                if(room.enemies.Count > 0)
+                if (room.enemies.Count > 0)
                 {
                     room.enemies[0].GetComponent<Enemy>().SetHeldItem(questItemObject);
                     break;
@@ -314,6 +354,28 @@ public class GameController : MonoBehaviour
             }
         }
 
+    }
+
+    private bool CheckIfQuestItemIsAlreadyInGame(string itemName)
+    {
+        List<string> playerQuestItems = this.playerController.GetOwnedQuestItems();
+        if (playerQuestItems.Contains(itemName))
+        {
+            return true;
+        }
+        
+        foreach(Room room in FullDungeonGenerator.GetFinalizedRooms().Values.ToList())
+        {
+            foreach(GameObject objectInRoom in room.droppedItemsInRoom)
+            {
+                QuestItem questItem = objectInRoom.GetComponent<QuestItem>();
+                if(questItem != null && questItem.questItemName == itemName)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public void TryToOpenTeleports(GameObject enemyObject)
@@ -342,17 +404,8 @@ public class GameController : MonoBehaviour
         this.dungeonGenerator.ResetGenerationAfterMainMenuReturn();
     }
 
-/*    public void GenerateDungeonForSavePurposes()
-    {
-        this.currentLvl = 1; //DO ZMIANY POZNIEJ, musisz to zapisac w save data i sobie pobrac
-        *//*this.dungeonGenerator.ResetGenerationAfterMainMenuReturn();*/
-        /*this.dungeonGenerator.isThisSavedGame = true;*//*
-        this.dungeonGenerator.GenerateDungeon();
-    }*/
-
     private void FixAlreadyLootedTreasures(TreasureStateData treasureStateData)
     {
-        /*List<GameObject> treasuresInDung = dungeonGenerator.GetTreasures();*/
         List<int> treasuresIdsFromSave = treasureStateData.treasuresIds;
         List<bool> treasuresStatesFromSave = treasureStateData.treasureOpenStates;
 
@@ -368,33 +421,17 @@ public class GameController : MonoBehaviour
             if (currentTreasureIndex != -1 && treasuresStatesFromSave.Count > currentTreasureIndex)
             {
                 treasure.isOpened = treasuresStatesFromSave[currentTreasureIndex];
-                if(treasure.isOpened)
+                if (treasure.isOpened)
                 {
                     treasure.SetAlreadyLootedTreasureFromSave();
                     treasure.DropItems(go.transform, true);
                     int pickUpId = -1;
                     int droppedItemIt = 0;
-                    foreach(GameObject droppedItem in treasure.droppedItems)
+                    foreach (GameObject droppedItem in treasure.droppedItems)
                     {
 
                         pickUpId = DetermineIdOfPickUpAbleObject(droppedItem);
-/*
-                        if (droppedItem.GetComponent<Coin>() != null)
-                        {
-                            Coin coin = droppedItem.GetComponent<Coin>();
-                            pickUpId = coin.pickUpEntityID;
-                        }
-                        else if (droppedItem.GetComponent<Collectable>() != null)
-                        {
-                            Collectable collectable = droppedItem.GetComponent<Collectable>();
-                            pickUpId = collectable.pickUpEntityID;
-                        }
-                        else if (droppedItem.GetComponent<Item>() != null)
-                        {
-                            Item item = droppedItem.GetComponent<Item>();
-                            pickUpId = item.pickUpEntityID;
-                        }*/
-                        if(pickUpId != -1 && treasureStateData.droppedItemsIds.Count > currentTreasureIndex)
+                        if (pickUpId != -1 && treasureStateData.droppedItemsIds.Count > currentTreasureIndex)
                         {
                             if (!treasureStateData.droppedItemsIds[currentTreasureIndex].Contains(pickUpId))
                             {
@@ -425,16 +462,16 @@ public class GameController : MonoBehaviour
         List<GameObject> treasureObjects = dungeonGenerator.GetTreasures();
         foreach (int i in properSequence)
         {
-            foreach(GameObject obj in treasureObjects)
+            foreach (GameObject obj in treasureObjects)
             {
-                if(obj.GetComponent<Treasure>().treasureID == i)
+                if (obj.GetComponent<Treasure>().treasureID == i)
                 {
                     finalOrder.Add(obj);
                 }
             }
         }
 
-        foreach(GameObject obj in treasureObjects)
+        foreach (GameObject obj in treasureObjects)
         {
             Treasure t = obj.GetComponent<Treasure>();
             if (!properSequence.Contains(t.treasureID))
@@ -465,28 +502,11 @@ public class GameController : MonoBehaviour
 
             List<GameObject> droppedItems = treasure.droppedItems;
             List<int> idsOfDroppedItemsOfThisTreasure = new List<int>();
-            foreach(GameObject droppedItem in droppedItems)
+            foreach (GameObject droppedItem in droppedItems)
             {
                 int pickUpId = DetermineIdOfPickUpAbleObject(droppedItem);
-/*
-                if (droppedItem.GetComponent<Coin>() != null)
-                {
-                    Coin coin = droppedItem.GetComponent<Coin>();
-                    pickUpId = coin.pickUpEntityID;
-                
-                }
-                else if (droppedItem.GetComponent<Collectable>() != null)
-                {
-                    Collectable collectable = droppedItem.GetComponent<Collectable>();
-                    pickUpId = collectable.pickUpEntityID;
-                }
-                else if (droppedItem.GetComponent<Item>() != null)
-                {
-                    Item item = droppedItem.GetComponent<Item>();
-                    pickUpId = item.pickUpEntityID;
-                }*/
 
-                if(pickUpId != -1)
+                if (pickUpId != -1)
                 {
                     Debug.Log("ADDING ID: " + pickUpId);
 
@@ -519,7 +539,7 @@ public class GameController : MonoBehaviour
     {
         List<int> ids = new List<int>();
 
-        foreach(GameObject go in this.shopRoomGenerator.itemsInShopRoom)
+        foreach (GameObject go in this.shopRoomGenerator.itemsInShopRoom)
         {
             ids.Add(DetermineIdOfPickUpAbleObject(go));
         }
@@ -555,9 +575,57 @@ public class GameController : MonoBehaviour
 
     public void ApplyQuestStateFromSave(QuestStateData data)
     {
+
         this.questController.SetQuestStateFromSave(data);
         this.questController.UpdateQuestProgressFromSaveProgress(data.currentQuestProgress);
     }
 
+    public void RemoveReferenceOfDroppedItemFromRoomByID(int roomId, GameObject destroyedObject)
+    {
+        if (FullDungeonGenerator.GetFinalizedRooms().Count > roomId)
+        {
+            Room room = FullDungeonGenerator.GetFinalizedRooms()[roomId];
+            foreach (GameObject obj in room.droppedItemsInRoom)
+            {
+
+                Debug.Log("Trying to destroy obj");
+
+                if (obj == destroyedObject)
+                {
+                    Debug.Log("DESTROYING OBJ");
+                    room.droppedItemsInRoom.Remove(obj);
+                    break;
+                }
+            }
+        }
+    }
+
+    public List<DroppedQuestItemStateData> GetAllDroppedQuestItemStateData()
+    {
+        List<DroppedQuestItemStateData> data = new List<DroppedQuestItemStateData>();
+        List<Room> rooms = FullDungeonGenerator.GetFinalizedRooms().Values.ToList();
+
+        foreach (Room room in rooms)
+        {
+            foreach (GameObject obj in room.droppedItemsInRoom)
+            {
+                QuestItem questItem = obj.GetComponent<QuestItem>();
+                if (questItem != null)
+                {
+                    data.Add(new DroppedQuestItemStateData(
+                        questItem.questItemName,
+                        room.Id,
+                        new List<float>
+                        {
+                            obj.transform.position.x,
+                            obj.transform.position.y,
+                            obj.transform.position.z
+                        }
+                        ));
+                }
+            }
+        }
+        return data;
+    }
 
 }

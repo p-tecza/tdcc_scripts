@@ -10,6 +10,7 @@ public class QuestItem : MonoBehaviour
     private float forceMultiplier = 3f;
     private float returnForceDelay = 0.15f;
     private bool isDropAnimationOn = true;
+    public int idOfRoom = 0;
 
     protected void CreateDropAnimation()
     {
@@ -34,6 +35,13 @@ public class QuestItem : MonoBehaviour
     public bool CanPickUp()
     {
         return !this.isDropAnimationOn;
+    }
+
+    private void OnDestroy()
+    {
+        Debug.Log("DESTROYING QUEST ITEM");
+        Debug.Log("ID OF ROOM: " + this.idOfRoom);
+        this.gameController.RemoveReferenceOfDroppedItemFromRoomByID(this.idOfRoom, this.gameObject);
     }
 
 }

@@ -14,10 +14,12 @@ public class SaveData {
     public TreasureStateData treasureStateData;
     public List<int> remainingShopItemIds;
     public QuestStateData questStateData;
+    public List<DroppedQuestItemStateData> droppedQuestItemData;
+    public List<string> heldQuestItems;
     public SaveData(UnityEngine.Random.State gameState, List<int> collectedCoinIDs, List<int> slainEnemyIDs,
         PlayerStats playerStats, AdditionalPlayerData additionalPlayerData, EnemiesStateData enemiesStateData,
         List<int> openedTreasuresSequence, TreasureStateData treasureStateData, List<int> pickedUpShopItemIds,
-        QuestStateData questStateData)
+        QuestStateData questStateData, List<DroppedQuestItemStateData> droppedQuestItemData, List<string> heldQuestItems)
     {
         this.gameState = gameState;
         this.collectedCoinIDs = collectedCoinIDs;
@@ -29,6 +31,8 @@ public class SaveData {
         this.treasureStateData = treasureStateData;
         this.remainingShopItemIds = pickedUpShopItemIds;
         this.questStateData = questStateData;
+        this.droppedQuestItemData = droppedQuestItemData;
+        this.heldQuestItems = heldQuestItems;
     }
 
 }

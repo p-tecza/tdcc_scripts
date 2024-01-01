@@ -96,7 +96,7 @@ public class QuestController : MonoBehaviour
             switch (questType)
             {
                 case "Retrieve item":
-                    List<QuestItem> itemList = this.gameController.GetListOfPlayerOwnedQuestItems();
+                    List<string> itemList = this.gameController.GetListOfPlayerOwnedQuestItems();
                     Debug.Log("Retrieve item for sure?");
                     if(CheckIfPlayerPossessesQuestItem(itemList, QUEST_ASTRAY_ITEM_NAME))
                     {
@@ -141,15 +141,14 @@ public class QuestController : MonoBehaviour
         return this.currentQuestProgress >= this.questProgressThreshold;
     }
 
-    private bool CheckIfPlayerPossessesQuestItem(List<QuestItem> possessedItems, string questItemName)
+    private bool CheckIfPlayerPossessesQuestItem(List<string> possessedItems, string questItemName)
     {
-        foreach(QuestItem item in possessedItems)
+        foreach(string item in possessedItems)
         {
-            Debug.Log("QUEST ITEM NAME: " + questItemName);
+            /*Debug.Log("QUEST ITEM NAME: " + questItemName);
             Debug.Log("COLLECTED ITEM NAME: " + item.questItemName);
-
-
-            if(item.questItemName == questItemName)
+*/
+            if(item == questItemName)
             {
                 return true;
             }
@@ -248,7 +247,8 @@ public class QuestController : MonoBehaviour
                 this.isQuestCompleted,
                 this.isQuestActive,
                 this.currentQuestData,
-                this.currentQuestProgress
+                this.currentQuestProgress,
+                this.questProgressThreshold
             );
     }
 
@@ -257,6 +257,15 @@ public class QuestController : MonoBehaviour
         this.isQuestActive = data.isQuestPickedUp;
         this.isQuestCompleted = data.isQuestCompleted;
         this.currentQuestData = data.questData;
+        if (this.isQuestActive)
+        {
+            this.PickUpQuest();
+        }
+        if(this.currentQuestData != null)
+        {
+            this.SetQuestData(this.currentQuestData);
+            this.questProgressThreshold = data.questProgressThreshold;
+        }
     }
 
 }

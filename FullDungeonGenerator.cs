@@ -358,9 +358,6 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
                 room.enemies.Add(enemy);
             }
 
-            /*room.RoomObjects = enemiesInRoom;*/
-
-
         }
     }
 
@@ -383,18 +380,13 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         {
 
             randNumOfCoins = UnityEngine.Random.Range(1, maxEnemiesInRoom);
-            HashSet<GameObject> currentObjectsInRoom = new HashSet<GameObject>(); //do zmiany, trzeba dopisaæ do listy pokoju
-
             for (int i = 0; i < randNumOfCoins; i++)
             {
                 Vector2Int randomField = room.FloorTiles.ElementAt(UnityEngine.Random.Range(0, room.FloorTiles.Count));
                 GameObject coin = Instantiate(this.coinsPrefab, ((Vector3Int)randomField), Quaternion.identity);
                 coin.transform.SetParent(this.instantiatedDungeonObjects.transform, true);
                 this.coins.Add(coin);
-                currentObjectsInRoom.Add(coin);
             }
-            room.RoomObjects = currentObjectsInRoom;
-
         }
     }
 

@@ -59,6 +59,14 @@ public abstract class Enemy : MonoBehaviour
         {
             GameObject obj = Instantiate(this.heldItem, gameObject.transform.parent);
             obj.transform.position = this.gameObject.transform.position;
+            QuestItem questItem = obj.GetComponent<QuestItem>();
+            if(questItem != null)
+            {
+                questItem.idOfRoom = playerController.GetCurrentlyActivatedRoom().Id;
+                playerController.AddDroppedItemToRoomInfo(obj);
+            }
+
+            
         }
     }
 

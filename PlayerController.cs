@@ -72,8 +72,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private int ownedStars;
 
-    private List<Item> ownedItems;
-    private List<QuestItem> ownedQuestItems;
+    private List<string> ownedItems;
+    private List<string> ownedQuestItems;
 
     [SerializeField]
     public float playerInteractionRange;
@@ -85,8 +85,8 @@ public class PlayerController : MonoBehaviour
     public void SetUpCharacter()
     {
         this.playerObject.SetActive(true);
-        this.ownedItems = new List<Item>();
-        this.ownedQuestItems = new List<QuestItem>();
+        this.ownedItems = new List<string>();
+        this.ownedQuestItems = new List<string>();
         this.questItemsLayer = LayerMask.NameToLayer("QuestItems");
         this.startingRoomID = 0;
         this.isQuestActive = false;
@@ -121,7 +121,7 @@ public class PlayerController : MonoBehaviour
         this.enableMovement = true;
         this.stopAllActions = false;
         this.currentRoom = this.roomInfo[this.startingRoomID];
-        this.ownedQuestItems = new List<QuestItem>();
+        this.ownedQuestItems = new List<string>();
         this.enabledNextLevelTeleport = false;
     }
 
@@ -376,15 +376,21 @@ public class PlayerController : MonoBehaviour
     private void PickUpItem(GameObject itemObject)
     {
         Item item = itemObject.GetComponent<Item>();
-        this.ownedItems.Add(item);
-        ApplyItemStats(item);
+        if (item != null)
+        {
+            this.ownedItems.Add(item.itemName);
+            ApplyItemStats(item);
+        }
         this.gameController.UpdateUIPlayerStats(GetStats());
     }
     private void PickUpQuestItem(GameObject itemObject)
     {
         Debug.Log("PICK UP QUEST ITEM PROCED");
         QuestItem item = itemObject.GetComponent<QuestItem>();
-        this.ownedQuestItems.Add(item);
+        if(item != null)
+        {
+            this.ownedQuestItems.Add(item.questItemName);
+        }
         this.gameController.UpdateQuestProgress();
     }
 
@@ -613,7 +619,7 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    public List<QuestItem> GetOwnedQuestItems()
+    public List<string> GetOwnedQuestItems()
     {
         return this.ownedQuestItems;
     }
@@ -634,9 +640,14 @@ public class PlayerController : MonoBehaviour
 
     private void SmiteAllEnemies_ADMIN()
     {
-        foreach(GameObject go in this.currentRoom.enemies)
+        List<Enemy> enemiesToSmite = new List<Enemy>();
+        foreach (GameObject go in this.currentRoom.enemies)
         {
             Enemy x = go.GetComponent<Enemy>();
+            enemiesToSmite.Add(x);
+        }
+        foreach (Enemy x in enemiesToSmite)
+        {
             x.TakeDamage(999999);
         }
     }
@@ -762,4 +773,15 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
+
+    public void AddDroppedItemToRoomInfo(GameObject gameObject)
+    {
+        this.currentRoom.droppedItemsInRoom.Add(gameObject);
+    }
+
+    public void SetOwnedQuestItemsFromSave(List<string> ownedQuestItems)
+    {
+        this.ownedQuestItems = ownedQuestItems;
+    }
+
 }

@@ -10,7 +10,7 @@ public class Room
     
     public HashSet<Vector2Int> FloorTiles { get; set; }
     public HashSet<Vector2Int> WallTiles { get; set; }
-    public HashSet<GameObject> RoomObjects { get; set; }
+    public List<GameObject> droppedItemsInRoom { get; set; }
     public List<GameObject> enemies { get; set; }
     public int Id { get; set; }
     public List<int> connections { get; set; }
@@ -24,7 +24,7 @@ public class Room
     {
         this.FloorTiles = new HashSet<Vector2Int>();
         this.WallTiles = new HashSet<Vector2Int>();
-        this.RoomObjects = new HashSet<GameObject>();
+        this.droppedItemsInRoom = new List<GameObject>();
         this.enemies = new List<GameObject>();
         this.connections = new List<int>();
         this.teleports = new List<Teleport>();
