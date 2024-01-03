@@ -6,6 +6,8 @@ using UnityEngine.UI;
 
 public class RangeEnemy : Enemy
 {
+    private static readonly int baseRangeEnemyHealthPoints = 80;
+    private static readonly int baseRangeEnemyAttackDamage = 10;
     public GameObject player;
     public GameObject projectile;
 
@@ -43,6 +45,7 @@ public class RangeEnemy : Enemy
     private void Awake()
     {
         base.SetEnemyID(GenerationEntityIDController.currentEnemyID);
+        ApplyLevelModifiers();
     }
     void Start()
     {
@@ -417,6 +420,19 @@ public class RangeEnemy : Enemy
         projectile.GetComponent<Rigidbody2D>().AddForce(vectorBetweenEntities * this.enemyProjectileSpeed);
         /*projectile.transform.SetParent(this.transform, true);*/
         return projectile;
-    } 
+    }
+    private void ApplyLevelModifiers()
+    {
+        (float, float) hpAdModifiers = base.CalculateAdditionalBuffsForLevel();
+        float hpModifier = hpAdModifiers.Item1;
+        float adModifier = hpAdModifiers.Item2;
 
+        this.healthPoints = (int)(baseRangeEnemyHealthPoints * hpModifier);
+        this.enemyAttackDamage = (int)(baseRangeEnemyAttackDamage * adModifier);
+    }
+
+    public override void RepairMaxHealth()
+    {
+        ApplyLevelModifiers();
+    }
 }

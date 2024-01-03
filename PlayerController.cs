@@ -83,7 +83,6 @@ public class PlayerController : MonoBehaviour
 
     private bool enabledNextLevelTeleport;
 
-    private bool wallCollision;
     private Vector3 previousMovementVec = Vector3.zero;
     public void SetUpCharacter()
     {
@@ -101,7 +100,6 @@ public class PlayerController : MonoBehaviour
         this.stopAllActions = false;
         this.enabledNextLevelTeleport = false;
         this.gameController.UpdateUICollectables(this.ownedHpPotions, this.ownedStars);
-        this.wallCollision = false;
         //TEMP
         /*PrimsAlgorithm.GenerateDungeonStructure(FullDungeonGenerator.GetFinalizedRooms());*/
         GridAlgorithm.GenerateDungeonStructure(FullDungeonGenerator.GetFinalizedRooms());
@@ -126,12 +124,11 @@ public class PlayerController : MonoBehaviour
         this.currentRoom = this.roomInfo[this.startingRoomID];
         this.ownedQuestItems = new List<string>();
         this.enabledNextLevelTeleport = false;
-        this.wallCollision = false;
     }
 
     void FixedUpdate()
     {
-        if (this.enableMovement && !this.wallCollision)
+        if (this.enableMovement)
         {
 
             if(Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
@@ -287,10 +284,7 @@ public class PlayerController : MonoBehaviour
 
         if (collision.gameObject.tag == "Walls")
         {
-            Debug.Log("WALL COLLISIOn, applying pushback");
             this.gameObject.transform.position -= this.previousMovementVec / 3;
-            /*ResetMyVelocity();*/
-            /*this.wallCollision = true;*/
         }
 
     }
@@ -299,21 +293,7 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.gameObject.tag == "Walls")
         {
-            Debug.Log("WALL COLLISIOn, applying pushback");
             this.gameObject.transform.position -= this.previousMovementVec / 3;
-            /*ResetMyVelocity();*/
-            /*this.wallCollision = true;*/
-        }
-    }
-
-    private void OnCollisionExit2D(Collision2D collision)
-    {
-        Debug.Log("out of WALL COLLISIOn");
-        if (collision.gameObject.tag == "Walls")
-        {
-            Debug.Log("out of WALL COLLISIOn");
-            
-            this.wallCollision = false;
         }
     }
 
@@ -795,6 +775,7 @@ public class PlayerController : MonoBehaviour
             foreach (GameObject eObject in room.enemies)
             {
                 Enemy e = eObject.GetComponent<Enemy>();
+                e.RepairMaxHealth();
                 int currentEnemyIndex = enemiesData.enemiesIds.IndexOf(e.enemyID);
                 if(currentEnemyIndex != -1 && enemiesData.enemiesLocations.Count > currentEnemyIndex)
                 {

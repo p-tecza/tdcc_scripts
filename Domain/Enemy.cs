@@ -87,7 +87,6 @@ public abstract class Enemy : MonoBehaviour
 
     public void SetEnemyCurrentHP(int newHpVal)
     {
-        Debug.Log("SETTING MY HP - ID: " + this.enemyID +"TO: "+newHpVal);
         this.currentHealth = newHpVal;
         SetSlider((float)this.currentHealth / this.healthPoints);
     }
@@ -106,5 +105,15 @@ public abstract class Enemy : MonoBehaviour
     {
         this.playerController.RemoveReferenceFromHeldEnemiesInRoom(this.gameObject);
     }
+
+    protected (float, float) CalculateAdditionalBuffsForLevel()
+    {
+        int currentLevel = this.gameController.GetCurrentLevel();
+        float healthModifier = Mathf.Sqrt(currentLevel);
+        float attackDamageModifier = Mathf.Pow(currentLevel, 1f / 3f);
+        return (healthModifier, attackDamageModifier);
+    }
+
+    public abstract void RepairMaxHealth();
 
 }

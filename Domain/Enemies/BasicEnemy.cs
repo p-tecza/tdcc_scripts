@@ -9,6 +9,8 @@ using UnityEngine;
 using UnityEngine.UI;
 public class BasicEnemy : Enemy
 {
+    private static readonly int baseBasicEnemyHealthPoints = 100;
+    private static readonly int baseBasicEnemyAttackDamage = 20;
     public GameObject player;
     public Animator animator;
     public Transform basicEnemyAttackPoint;
@@ -42,6 +44,7 @@ public class BasicEnemy : Enemy
     private void Awake()
     {
         base.SetEnemyID(GenerationEntityIDController.currentEnemyID);
+        ApplyLevelModifiers();
     }
     void Start()
     {
@@ -71,7 +74,6 @@ public class BasicEnemy : Enemy
         };
 
         InitializeHitRangeExtension();
-        /* Physics2D.IgnoreLayerCollision(6, 7); // 6 - enemies, 7 - player*/
     }
 
     void FixedUpdate()
@@ -430,4 +432,17 @@ public class BasicEnemy : Enemy
         return movementVector;
     }
 
+    private void ApplyLevelModifiers()
+    {
+        (float, float) hpAdModifiers = base.CalculateAdditionalBuffsForLevel();
+        float hpModifier = hpAdModifiers.Item1;
+        float adModifier = hpAdModifiers.Item2;
+        this.healthPoints = (int)(baseBasicEnemyHealthPoints * hpModifier);
+        this.enemyAttackDamage = (int)(baseBasicEnemyAttackDamage * adModifier);
+    }
+
+    public override void RepairMaxHealth()
+    {
+        ApplyLevelModifiers();
+    }
 }

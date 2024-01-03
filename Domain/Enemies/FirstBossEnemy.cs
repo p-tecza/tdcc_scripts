@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class FirstBossEnemy : Enemy
 {
+    private static readonly int baseFirstBossEnemyHealthPoints = 400;
+    private static readonly int baseFirstBossEnemyAttackDamage = 10;
 
     public GameObject player;
     public Animator animator;
@@ -37,30 +39,14 @@ public class FirstBossEnemy : Enemy
     private void Awake()
     {
         base.SetEnemyID(GenerationEntityIDController.currentEnemyID);
+        ApplyLevelModifiers();
         this.currentHealth = this.healthPoints;
     }
 
     void Start()
     {
         BoxCollider2D enemyCollider = gameObject.GetComponent<BoxCollider2D>();
-        /*this.colliderWidth = enemyCollider.size.x;
-        this.colliderHeight = enemyCollider.size.y;
-        this.GetComponent<Animator>().SetFloat("attackSpeedMultiplier", this.attackSpeed);
-        collisionSensors = new List<Vector2>()
-        {
-            new Vector2(0,0),
-            new Vector2(this.colliderWidth/2, -this.colliderHeight/2),
-            new Vector2(-this.colliderWidth/2, -this.colliderHeight/2),
-            new Vector2(this.colliderWidth/2, this.colliderHeight/2),
-            new Vector2(-this.colliderWidth/2, this.colliderHeight/2),
-            new Vector2(this.colliderWidth/2, 0),
-            new Vector2(-this.colliderWidth/2, 0),
-            new Vector2(0, -this.colliderHeight/2),
-            new Vector2(0, this.colliderHeight/2)
-        };*/
-
         InitializeHitRangeExtension();
-        /* Physics2D.IgnoreLayerCollision(6, 7); // 6 - enemies, 7 - player*/
     }
 
     private void FixedUpdate()
@@ -291,16 +277,28 @@ public class FirstBossEnemy : Enemy
         if (attackPoint1 == null)
             return;
         Gizmos.DrawWireSphere(attackPoint1.position, this.bossAttackRange);
-        Debug.Log("aaa");
         if (attackPoint2 == null)
             return;
 
-        Debug.Log("EEE");
         Gizmos.DrawWireSphere(attackPoint2.position, this.bossSpinAttackRange);
 
         if (attackPoint3 == null)
             return;
         Gizmos.DrawWireSphere(attackPoint3.position, this.bossWideAttackRange);
+    }
+
+    private void ApplyLevelModifiers()
+    {
+        (float, float) hpAdModifiers = base.CalculateAdditionalBuffsForLevel();
+        float hpModifier = hpAdModifiers.Item1;
+        float adModifier = hpAdModifiers.Item2;
+
+        this.healthPoints = (int)(baseFirstBossEnemyHealthPoints * hpModifier);
+        this.enemyAttackDamage = (int)(baseFirstBossEnemyAttackDamage * adModifier);
+    }
+    public override void RepairMaxHealth()
+    {
+        ApplyLevelModifiers();
     }
 
 }
