@@ -64,15 +64,6 @@ public class TeleportOrientationHelper
                 chosenIndex = chosenIndex + randomOffset;
             }
         }
-        Debug.Log("RELATIVE LOCAITON: " + relativeLocation);
-        Debug.Log("AVAILABLE TILES COUNT: "+availableTiles.Count);
-        Debug.Log("CHOSEN INDEX PRE EXCEPTION: " + chosenIndex);
-
-        if(chosenIndex < 0 || chosenIndex >= availableTiles.Count)
-        {
-            Debug.Log("PROBLEM!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            /*return new Vector2Int(0, 0);*/
-        }
 
         return availableTiles[chosenIndex];
     }

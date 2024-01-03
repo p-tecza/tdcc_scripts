@@ -90,7 +90,6 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
             }
             if(toOverride)
             {
-                Debug.Log("DO NAPRAWY");
                 newFloor.Add(wallTile);
             }
             else

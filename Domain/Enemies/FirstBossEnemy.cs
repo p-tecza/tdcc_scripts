@@ -37,11 +37,11 @@ public class FirstBossEnemy : Enemy
     private void Awake()
     {
         base.SetEnemyID(GenerationEntityIDController.currentEnemyID);
+        this.currentHealth = this.healthPoints;
     }
 
     void Start()
     {
-        this.currentHealth = this.healthPoints;
         BoxCollider2D enemyCollider = gameObject.GetComponent<BoxCollider2D>();
         /*this.colliderWidth = enemyCollider.size.x;
         this.colliderHeight = enemyCollider.size.y;
@@ -145,6 +145,7 @@ public class FirstBossEnemy : Enemy
         this.isActive = false;
         this.GetComponent<Collider2D>().enabled = false;
         this.hpCanvas.enabled = false;
+        this.gameController.BossDies();
         ProgressHolder.slainEnemyIDs.Add(this.GetEnemyID());
         Invoke("AcknowledgeEnemyDeath", 1f);
         Invoke("OpenNextLevelTeleport", 1f);
@@ -157,7 +158,7 @@ public class FirstBossEnemy : Enemy
         this.gameController.ShowNextLevelTeleport();
     }
 
-    private void AcknowledgeEnemyDeath()
+    public void AcknowledgeEnemyDeath()
     {
         base.AcknowledgeDeath(this.gameObject);
     }

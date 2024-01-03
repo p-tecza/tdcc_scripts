@@ -36,6 +36,7 @@ public class GameController : MonoBehaviour
     public TMP_Text playerMovementSpeed;
     public TMP_Text ownedHpPots;
     public TMP_Text ownedStars;
+    public TMP_Text currentFloor;
 
     public Canvas priceCanvas;
     public Canvas hintCanvas;
@@ -78,20 +79,21 @@ public class GameController : MonoBehaviour
         }
         GenerationEntityIDController.ResetAllIDs();
         ProgressHolder.ResetProgressIDs();
+        this.enemiesTracker = new EnemiesTracker();
+        InitEnemiesTracker();
         dungeonGenerator.GenerateDungeon();
         Vector3 startPosition = dungeonGenerator.GetStartingPosition();
         playerObject.transform.position = startPosition;
         mainCamera.transform.position = startPosition;
         playerController.SetUpCharacter();
         playerController.enabled = true;
-        this.enemiesTracker = new EnemiesTracker();
-        InitEnemiesTracker();
         if (gameFromSave)
         {
             OverwriteNeccessaryData();
         }
         PlayerStats ps = playerObject.GetComponent<PlayerController>().GetStats();
         UpdateUIPlayerStats(ps);
+        UpdateUICurrentFloor();
     }
 
     private void OverwriteNeccessaryData()
@@ -99,8 +101,11 @@ public class GameController : MonoBehaviour
         SaveData saveData = dungeonGenerator.GetLoadedDataFromSave();
         playerController.stats = saveData.playerStats;
         playerController.SetAdditionalPlayerData(saveData.additionalPlayerData);
+        currentLvl = saveData.currentLevel;
         UpdateUICoinsAmount(saveData.additionalPlayerData.coinsAmount);
         UpdateUICollectables(saveData.additionalPlayerData.collectedHpPotions, saveData.additionalPlayerData.collectedStars);
+        UpdateUICurrentFloor();
+        FixBossStateFromSave(saveData.enemiesStateData.isBossDead);
         playerController.SetEnemiesStateData(saveData.enemiesStateData);
         playerController.DetermineIfRoomTeleportsShallBeOpen();
         FixAlreadyLootedTreasures(saveData.treasureStateData);
@@ -178,6 +183,7 @@ public class GameController : MonoBehaviour
         this.enemiesTracker = new EnemiesTracker();
         InitEnemiesTracker();
         playerController.SetUpCharacterForNextDungeonLevel();
+        UpdateUICurrentFloor();
     }
 
     // Update is called once per frame
@@ -210,6 +216,11 @@ public class GameController : MonoBehaviour
     {
         this.ownedHpPots.text = hpPotsAmount.ToString();
         this.ownedStars.text = starsAmount.ToString();
+    }
+
+    public void UpdateUICurrentFloor()
+    {
+        this.currentFloor.text = "CURRENT FLOOR: " + currentLvl;
     }
 
     public static void RemoveItemFromAvailableSpecificItemLoot(int itemId)
@@ -342,7 +353,7 @@ public class GameController : MonoBehaviour
         Dictionary<int, Room> rooms = FullDungeonGenerator.GetFinalizedRooms();
         int pickedRoom = UnityEngine.Random.Range(0, rooms.Count);
 
-        if (rooms[pickedRoom].enemies.Count > 0)
+        if (rooms[pickedRoom].enemies.Count > 0 && pickedRoom != dungeonGenerator.GetBossRoomID())
         {
             rooms[pickedRoom].enemies[0].GetComponent<Enemy>().SetHeldItem(questItemObject);
             Debug.Log("PRZYPISANIE ITEMA DO ENEMY: " + rooms[pickedRoom].enemies[0].GetComponent<Enemy>().GetEnemyID());
@@ -351,7 +362,7 @@ public class GameController : MonoBehaviour
         {
             foreach (Room room in rooms.Values)
             {
-                if (room.enemies.Count > 0)
+                if (room.enemies.Count > 0 && room.Id != dungeonGenerator.GetBossRoomID())
                 {
                     room.enemies[0].GetComponent<Enemy>().SetHeldItem(questItemObject);
                     Debug.Log("PRZYPISANIE ITEMA DO ENEMY: " + room.enemies[0].GetComponent<Enemy>().GetEnemyID());
@@ -643,5 +654,20 @@ public class GameController : MonoBehaviour
     public int GetShopRoomID()
     {
         return this.dungeonGenerator.GetShopRoomID();
+    }
+
+    public void BossDies()
+    {
+        this.enemiesTracker.SetBossState(true);
+    }
+
+    private void FixBossStateFromSave(bool isBossDead)
+    {
+        this.bossRoomGenerator.RepairBossRoomStateFromSave(isBossDead);
+    }
+
+    public int GetCurrentLevel()
+    {
+        return this.currentLvl;
     }
 }

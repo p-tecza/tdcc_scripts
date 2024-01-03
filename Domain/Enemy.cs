@@ -87,6 +87,7 @@ public abstract class Enemy : MonoBehaviour
 
     public void SetEnemyCurrentHP(int newHpVal)
     {
+        Debug.Log("SETTING MY HP - ID: " + this.enemyID +"TO: "+newHpVal);
         this.currentHealth = newHpVal;
         SetSlider((float)this.currentHealth / this.healthPoints);
     }

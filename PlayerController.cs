@@ -82,6 +82,9 @@ public class PlayerController : MonoBehaviour
     private int questItemsLayer;
 
     private bool enabledNextLevelTeleport;
+
+    private bool wallCollision;
+    private Vector3 previousMovementVec = Vector3.zero;
     public void SetUpCharacter()
     {
         this.playerObject.SetActive(true);
@@ -98,7 +101,7 @@ public class PlayerController : MonoBehaviour
         this.stopAllActions = false;
         this.enabledNextLevelTeleport = false;
         this.gameController.UpdateUICollectables(this.ownedHpPotions, this.ownedStars);
-
+        this.wallCollision = false;
         //TEMP
         /*PrimsAlgorithm.GenerateDungeonStructure(FullDungeonGenerator.GetFinalizedRooms());*/
         GridAlgorithm.GenerateDungeonStructure(FullDungeonGenerator.GetFinalizedRooms());
@@ -123,11 +126,12 @@ public class PlayerController : MonoBehaviour
         this.currentRoom = this.roomInfo[this.startingRoomID];
         this.ownedQuestItems = new List<string>();
         this.enabledNextLevelTeleport = false;
+        this.wallCollision = false;
     }
 
     void FixedUpdate()
     {
-        if (this.enableMovement)
+        if (this.enableMovement && !this.wallCollision)
         {
 
             if(Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
@@ -140,15 +144,18 @@ public class PlayerController : MonoBehaviour
             }
             
             this.animator.SetBool("isRunning", isRunning);
+            this.previousMovementVec = Vector3.zero;
 
             if (Input.GetKey(KeyCode.W) && !isAttacking && !this.stopAllActions)
             {
                 this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(0, this.stats.movementSpeed, 0);
+                this.previousMovementVec += new Vector3(0, this.stats.movementSpeed, 0);
             }
 
             if (Input.GetKey(KeyCode.S) && !isAttacking && !this.stopAllActions)
             {
                 this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(0, -this.stats.movementSpeed, 0);
+                this.previousMovementVec += new Vector3(0, -this.stats.movementSpeed, 0);
             }
 
             if (Input.GetKey(KeyCode.A) && !isAttacking && !this.stopAllActions)
@@ -156,6 +163,7 @@ public class PlayerController : MonoBehaviour
                 this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(-this.stats.movementSpeed, 0, 0);
                 this.playerObject.transform.rotation = new Quaternion(this.playerObject.transform.rotation.x,
                             0f, this.playerObject.transform.rotation.z, this.playerObject.transform.rotation.w);
+                this.previousMovementVec += new Vector3(-this.stats.movementSpeed, 0, 0);
             }
 
             if (Input.GetKey(KeyCode.D) && !isAttacking && !this.stopAllActions)
@@ -163,6 +171,7 @@ public class PlayerController : MonoBehaviour
                 this.playerObject.transform.position = this.playerObject.transform.position += new Vector3(this.stats.movementSpeed, 0, 0);
                 this.playerObject.transform.rotation = new Quaternion(this.playerObject.transform.rotation.x,
                             180f, this.playerObject.transform.rotation.z, this.playerObject.transform.rotation.w);
+                this.previousMovementVec += new Vector3(this.stats.movementSpeed, 0, 0);
 
             }     
 
@@ -276,6 +285,36 @@ public class PlayerController : MonoBehaviour
             TryToPickUpShopItem(collision.gameObject);
         }
 
+        if (collision.gameObject.tag == "Walls")
+        {
+            Debug.Log("WALL COLLISIOn, applying pushback");
+            this.gameObject.transform.position -= this.previousMovementVec / 3;
+            /*ResetMyVelocity();*/
+            /*this.wallCollision = true;*/
+        }
+
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "Walls")
+        {
+            Debug.Log("WALL COLLISIOn, applying pushback");
+            this.gameObject.transform.position -= this.previousMovementVec / 3;
+            /*ResetMyVelocity();*/
+            /*this.wallCollision = true;*/
+        }
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        Debug.Log("out of WALL COLLISIOn");
+        if (collision.gameObject.tag == "Walls")
+        {
+            Debug.Log("out of WALL COLLISIOn");
+            
+            this.wallCollision = false;
+        }
     }
 
     private void SetProperTeleportSprites()
@@ -744,7 +783,8 @@ public class PlayerController : MonoBehaviour
             enemiesLocations,
             this.gameController.enemiesTracker.GetStartEnemiesAmount(),
             this.gameController.enemiesTracker.GetAliveEnemiesAmount(),
-            this.gameController.enemiesTracker.GetDeadEnemiesAmount()
+            this.gameController.enemiesTracker.GetDeadEnemiesAmount(),
+            this.gameController.enemiesTracker.CheckIfBossIsDead()
             );
     }
 
@@ -772,6 +812,7 @@ public class PlayerController : MonoBehaviour
         savedEnemiesTracker.SetAliveEnemiesAmount(enemiesData.aliveEnemiesAmount);
         savedEnemiesTracker.SetStartEnemiesAmount(enemiesData.startEnemiesAmount);
         savedEnemiesTracker.SetDeadEnemiesAmount(enemiesData.deadEnemiesAmount);
+        savedEnemiesTracker.SetBossState(enemiesData.isBossDead);
 
         this.gameController.enemiesTracker = savedEnemiesTracker;
     }

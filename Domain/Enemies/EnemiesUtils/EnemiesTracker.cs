@@ -3,7 +3,7 @@ public class EnemiesTracker
     private int startEnemiesAmount=0;
     private int aliveEnemiesAmount=0;
     private int deadEnemiesAmount=0;
-    
+    private bool isBossDead = false;
 
 
     public void EnemyDies()
@@ -23,7 +23,10 @@ public class EnemiesTracker
     {
         return this.startEnemiesAmount;
     }
-
+    public bool CheckIfBossIsDead()
+    {
+        return this.isBossDead;
+    }
     public void SetDeadEnemiesAmount(int deadAmount)
     {
         this.deadEnemiesAmount = deadAmount;
@@ -35,6 +38,11 @@ public class EnemiesTracker
     public void SetStartEnemiesAmount(int startAmount)
     {
         this.startEnemiesAmount = startAmount;
+    }
+
+    public void SetBossState(bool isDead)
+    {
+        this.isBossDead = isDead;
     }
 
 }

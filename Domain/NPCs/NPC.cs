@@ -30,10 +30,10 @@ public class NPC : MonoBehaviour
 
     public static List<string> npcTypes = new List<string>()
     {
-        "Trainer", "Trader", "Wanderer", "Astray"
+        "Trainer", "Wanderer", "Astray"
     };
     // Trainer -> possibility to upgrade some of your skills
-    // Trader -> possibility to buy an item with discounted price
+    // Trader -> possibility to buy an item with discounted price -> TRADER REMOVED
     // Wanderer -> basic talk, nothing game-changing
     // Astray -> grants an item after returning something he lost
     public virtual void Interact()

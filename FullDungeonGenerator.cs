@@ -283,10 +283,6 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
         List<int> list = new List<int>();
         for (int i = 0; i < amountOfPossibleTreasures; i++) { list.Add(i); }
         GameController.SetAvailableSpecificItemLoot(list);
-        foreach (var x in GameController.GetAvailableSpecificItemLoot())
-        {
-            Debug.Log(x + "<-itemId");
-        }
     }
 
     private Dictionary<string, int> GetSpecificTreasureContent(Dictionary<string, int> all, int whichRoom)
@@ -391,7 +387,8 @@ public class FullDungeonGenerator : RoomFirstDungeonGenerator
             for (int i = 0; i < randNumOfCoins; i++)
             {
                 Vector2Int randomField = room.FloorTiles.ElementAt(UnityEngine.Random.Range(0, room.FloorTiles.Count));
-                GameObject coin = Instantiate(this.coinsPrefab, ((Vector3Int)randomField), Quaternion.identity);
+                Vector3 finalRandomField = new Vector3(randomField.x + 0.5f, randomField.y + 0.5f, 0);
+                GameObject coin = Instantiate(this.coinsPrefab, finalRandomField, Quaternion.identity);
                 coin.transform.SetParent(this.instantiatedDungeonObjects.transform, true);
                 this.coins.Add(coin);
             }

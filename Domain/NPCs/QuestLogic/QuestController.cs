@@ -30,6 +30,7 @@ public class QuestController : MonoBehaviour
         this.isQuestActive = true;
         this.questPickedUp.SetActive(true);
         this.questCompleted.SetActive(false);
+        UnhiglightQuest();
     }
 
     public void SetQuestData(QuestData questData)
@@ -166,6 +167,13 @@ public class QuestController : MonoBehaviour
         questProgress.color = new UnityEngine.Color(r, g, b, 1);
     }
 
+    private void UnhiglightQuest()
+    {
+        Transform questContentTransform = this.questWindowObject.transform.Find("QuestContent");
+        TMP_Text questDisplayProgress = questContentTransform.Find("QuestProgress").gameObject.GetComponent<TMP_Text>();
+        questDisplayProgress.color = new UnityEngine.Color(1, 1, 1, 1);
+    }
+
     public (string, string) GetStateDataOfQuestForInteractionWindow()
     {
         if(GetQuestState() == QuestState.STARTED)
@@ -240,6 +248,9 @@ public class QuestController : MonoBehaviour
         this.isQuestCompleted = false;
         this.isQuestActive = false;
         this.currentQuestProgress = 0;
+        this.questWindowObject.SetActive(false);
+        this.questPickedUp.SetActive(false);
+        this.questCompleted.SetActive(false);
     }
 
     public QuestStateData GetFullQuestStateData()

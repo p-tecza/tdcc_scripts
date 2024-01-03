@@ -16,10 +16,11 @@ public class SaveData {
     public QuestStateData questStateData;
     public List<DroppedQuestItemStateData> droppedQuestItemData;
     public List<string> heldQuestItems;
+    public int currentLevel;
     public SaveData(UnityEngine.Random.State gameState, List<int> collectedCoinIDs, List<int> slainEnemyIDs,
         PlayerStats playerStats, AdditionalPlayerData additionalPlayerData, EnemiesStateData enemiesStateData,
         List<int> openedTreasuresSequence, TreasureStateData treasureStateData, List<int> pickedUpShopItemIds,
-        QuestStateData questStateData, List<DroppedQuestItemStateData> droppedQuestItemData, List<string> heldQuestItems)
+        QuestStateData questStateData, List<DroppedQuestItemStateData> droppedQuestItemData, List<string> heldQuestItems, int currentLevel)
     {
         this.gameState = gameState;
         this.collectedCoinIDs = collectedCoinIDs;
@@ -33,6 +34,7 @@ public class SaveData {
         this.questStateData = questStateData;
         this.droppedQuestItemData = droppedQuestItemData;
         this.heldQuestItems = heldQuestItems;
+        this.currentLevel = currentLevel;
     }
 
 }

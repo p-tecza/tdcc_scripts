@@ -9,9 +9,10 @@ public class EnemiesStateData
     public int startEnemiesAmount;
     public int aliveEnemiesAmount;
     public int deadEnemiesAmount;
+    public bool isBossDead;
 
     public EnemiesStateData(List<int> enemiesIds, List<int> enemiesHps, List<List<float>> enemiesLocations,
-        int startEnemiesAmount, int aliveEnemiesAmount, int deadEnemiesAmount)
+        int startEnemiesAmount, int aliveEnemiesAmount, int deadEnemiesAmount, bool isBossDead)
     {
         this.enemiesLocations = enemiesLocations;
         this.enemiesHps = enemiesHps;
@@ -19,5 +20,6 @@ public class EnemiesStateData
         this.startEnemiesAmount = startEnemiesAmount;
         this.aliveEnemiesAmount = aliveEnemiesAmount;
         this.deadEnemiesAmount = deadEnemiesAmount;
+        this.isBossDead = isBossDead;
     }
 }

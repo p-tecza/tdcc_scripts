@@ -13,11 +13,24 @@ public class BossRoomGenerator : MonoBehaviour
 
     [SerializeField]
     private PlayerController playerController;
+    [SerializeField]
+    private GameController gameController;
+
+    private GameObject bossObject;
 
     public void SetUpBossRoom(Room room, GameObject parentObjectForInstantiated)
     {
         this.GenerateBoss(room, parentObjectForInstantiated);
         this.GenerateTeleportToNextLevel(room, parentObjectForInstantiated);
+        /*EnemiesTracker enemiesTracker = this.gameController.GetEnemiesTracker();
+        if (!enemiesTracker.CheckIfBossIsDead())
+        {
+            
+        }
+        else
+        {
+            OpenNextLevelTeleport();
+        }*/
     }
 
     private void GenerateBoss(Room room, GameObject parentObjectForInstantiated)
@@ -27,6 +40,7 @@ public class BossRoomGenerator : MonoBehaviour
         GameObject bossObject = Instantiate(firstBossPrefab);
         bossObject.transform.position = instantiatedPosition;
         bossObject.transform.SetParent(parentObjectForInstantiated.transform, true);
+        this.bossObject = bossObject;
         room.enemies.Add(bossObject);
     }
 
@@ -40,6 +54,19 @@ public class BossRoomGenerator : MonoBehaviour
         newGameObject.transform.SetParent(parentObjectForInstantiated.transform, true);
         this.thisRoomNextLevelTeleport = newGameObject;
     }
+
+    public void RepairBossRoomStateFromSave(bool isBossDead)
+    {
+        if (isBossDead && this.bossObject != null)
+        {
+            this.bossObject.GetComponent<FirstBossEnemy>().AcknowledgeEnemyDeath();
+            Destroy(this.bossObject);
+            this.bossObject = null;
+            OpenNextLevelTeleport();
+            EnableTp();
+        }
+    }
+
     public void OpenNextLevelTeleport()
     {
         this.thisRoomNextLevelTeleport.SetActive(true);

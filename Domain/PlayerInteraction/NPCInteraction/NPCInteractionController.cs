@@ -276,7 +276,6 @@ public class NPCInteractionController : MonoBehaviour
                 if (this.procBy == null) return;
 
                 TrainerNPC trainerNPC = this.procBy.GetComponent<TrainerNPC>();
-                int trainingCost = trainerNPC.trainingCost;
                 switch (optionNumber)
                 {
                     case 1: //TGH
@@ -300,7 +299,7 @@ public class NPCInteractionController : MonoBehaviour
                         break;
                 }
                 this.SetProperDialogOfNPCInteractionWindow(this.interactiveDialogDataTemp.consecutiveDialogs);
-
+                AppendSomeInfoToInteractionWindowDescription(" [ cost:" + trainerNPC.trainingCost + " | multiplier:" + trainerNPC.costRaiseMultiplier + " ]");
             }
             else if(npcType == "Trader")
             {
