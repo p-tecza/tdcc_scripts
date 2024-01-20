@@ -409,6 +409,7 @@ public class PlayerController : MonoBehaviour
         {
             this.ownedItems.Add(item.itemName);
             ApplyItemStats(item);
+            this.animator.SetFloat("asMultiplier", this.stats.attackSpeed);
         }
         this.gameController.UpdateUIPlayerStats(GetStats());
     }
@@ -488,6 +489,11 @@ public class PlayerController : MonoBehaviour
     }
     public void TakeDamage(int dmg)
     {
+        if(this.stats.toughness > 0)
+        {
+            dmg -= this.stats.toughness;
+        }
+
 
         if (this.stopAllActions) return;
 
@@ -657,7 +663,7 @@ public class PlayerController : MonoBehaviour
     {
         if (playerAttackPoint == null)
             return;
-        Gizmos.DrawWireSphere(playerAttackPoint.position, this.playerAttackRange);
+        Gizmos.DrawWireSphere(playerAttackPoint.position, this.stats.attackRange);
 
         Transform playerInteractionPoint = transform.Find("InteractionRefPoint");
 

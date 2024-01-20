@@ -62,6 +62,8 @@ public class GameController : MonoBehaviour
     [SerializeField]
     private ShopRoomGenerator shopRoomGenerator;
 
+    public GameObject controlsMenu;
+
     public static bool gameFromSave = false;
 
     /*    private void Awake()
@@ -79,9 +81,9 @@ public class GameController : MonoBehaviour
         }
         GenerationEntityIDController.ResetAllIDs();
         ProgressHolder.ResetProgressIDs();
+        dungeonGenerator.GenerateDungeon();
         this.enemiesTracker = new EnemiesTracker();
         InitEnemiesTracker();
-        dungeonGenerator.GenerateDungeon();
         Vector3 startPosition = dungeonGenerator.GetStartingPosition();
         playerObject.transform.position = startPosition;
         mainCamera.transform.position = startPosition;
@@ -280,12 +282,7 @@ public class GameController : MonoBehaviour
         GameObject objectToInteractWith = this.playerController.FindNearestInteractiveEntity();
         if (objectToInteractWith == null) return;
         InteractiveDialogData data = objectToInteractWith.GetComponent<NPC>().GetNPCData();
-
         gameObject.GetComponent<NPCInteractionController>().EnableInteractionWindow(data, objectToInteractWith);
-
-        Debug.Log("NEAREST interactive ENTITY: " + objectToInteractWith.name);
-
-
     }
 
     public bool AreHintsVisible()
@@ -313,6 +310,9 @@ public class GameController : MonoBehaviour
         {
             enemyCounter += r.enemies.Count;
         }
+
+        Debug.Log("SETTING START ENEMIES: " + enemyCounter);
+
         this.enemiesTracker.SetStartEnemiesAmount(enemyCounter);
         this.enemiesTracker.SetAliveEnemiesAmount(enemyCounter);
         this.enemiesTracker.SetDeadEnemiesAmount(0);
@@ -670,4 +670,16 @@ public class GameController : MonoBehaviour
     {
         return this.currentLvl;
     }
+
+
+    public void EnableControls()
+    {
+        this.controlsMenu.SetActive(true);
+    }
+
+    public void DisableControls()
+    {
+        this.controlsMenu.SetActive(false);
+    }
+
 }

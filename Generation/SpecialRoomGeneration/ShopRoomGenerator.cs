@@ -48,8 +48,12 @@ public class ShopRoomGenerator : MonoBehaviour
         {
             AllInteractiveDialogData allNPCDialogData = DataReader.ReadAllNPCDialogData();
             GameObject refNPCObject = Instantiate(npcObject, npcSpot, Quaternion.identity);
+            
             refNPCObject.transform.SetParent(parentObjectForInstantiated.transform, true);
+            //
             refNPCObject.GetComponent<NPC>().SetNPCData(allNPCDialogData);
+            Vector3 NPCposition = refNPCObject.transform.GetChild(0).transform.position;
+            refNPCObject.transform.position += (refNPCObject.transform.position-NPCposition);
             this.npcInShopRoom = refNPCObject;
         }
 

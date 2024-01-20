@@ -8,7 +8,7 @@
     },
     {
       "name": "Hp Potion",
-      "description": "Description of Hp Potion collectable",
+      "description": "This bottle holds liquid, that might help you with injuries.",
       "impactType": "healPower",
       "impactValue": 20
     }

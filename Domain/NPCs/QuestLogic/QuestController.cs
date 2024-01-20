@@ -78,6 +78,7 @@ public class QuestController : MonoBehaviour
                 return 1;
             case "Purge":
                 int allEnemiesInDung = this.gameController.GetAmountOfAllEnemiesInDungeonFloor();
+                Debug.Log("ALL ENEMIES IN DUNG: " + allEnemiesInDung);
                 int random = UnityEngine.Random.Range(2, 5);
                 this.moneyRewardMultiplier = 1 + 0.5f * (4 - random);
                 int enemiesThreshold = Mathf.FloorToInt(allEnemiesInDung / random);
@@ -98,7 +99,6 @@ public class QuestController : MonoBehaviour
             {
                 case "Retrieve item":
                     List<string> itemList = this.gameController.GetListOfPlayerOwnedQuestItems();
-                    Debug.Log("Retrieve item for sure?");
                     if(CheckIfPlayerPossessesQuestItem(itemList, QUEST_ASTRAY_ITEM_NAME))
                     {
                         this.currentQuestProgress = 1;

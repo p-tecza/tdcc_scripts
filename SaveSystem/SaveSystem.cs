@@ -13,15 +13,9 @@ public static class SaveSystem
         BinaryFormatter binaryFormatter = new BinaryFormatter();
         string path = Application.persistentDataPath + FILE_NAME;
         FileStream stream = new FileStream(path, FileMode.Create);
-
-
         SaveData data = saveData;
-
         binaryFormatter.Serialize(stream, data);
         stream.Close();
-
-        Debug.Log("PATH: "+path);
-
     }
 
     public static SaveData LoadData()
